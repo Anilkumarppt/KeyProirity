@@ -191,7 +191,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         @Override
         public void onClick(final View view) {
 
-              startActivity(new Intent(getActivity(),AllUsersActivity.class));
+              startActivity(new Intent(view.getContext(),AllUsersActivity.class));
                 /*new LovelyTextInputDialog(view.getContext(), R.style.EditTextTintTheme)
                     .setTopColorRes(R.color.colorPrimary)
                     .setTitle("Add friend")

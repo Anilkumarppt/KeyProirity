@@ -29,6 +29,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -88,7 +89,7 @@ public class UserProfileFragment extends Fragment {
 
             listConfig.clear();
             myAccount = dataSnapshot.getValue(User.class);
-
+           // Toast.makeText(context, myAccount.name.toString(), Toast.LENGTH_SHORT).show();
             setupArrayListInfo(myAccount);
             if(infoAdapter != null){
                 infoAdapter.notifyDataSetChanged();
@@ -112,9 +113,11 @@ public class UserProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID);
-        userDB.addListenerForSingleValueEvent(userListener);
         mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user=mAuth.getCurrentUser();
+        String uid=user.getUid().toString();
+        userDB = FirebaseDatabase.getInstance().getReference().child("user").child(uid);
+        userDB.addValueEventListener(userListener);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_info, container, false);
@@ -140,9 +143,6 @@ public class UserProfileFragment extends Fragment {
         return view;
     }
 
-    /**
-     * Khi click vào avatar thì bắn intent mở trình xem ảnh mặc định để chọn ảnh
-     */
     private View.OnClickListener onAvatarClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {

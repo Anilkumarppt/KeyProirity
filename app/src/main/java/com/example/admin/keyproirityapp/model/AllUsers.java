@@ -5,6 +5,7 @@ public class AllUsers {
     public String email;
     public String avata;
     public String mobile;
+    public Status status;
     String uid;
 
     public String getUid() {
@@ -18,11 +19,12 @@ public class AllUsers {
     public AllUsers() {
     }
 
-    public AllUsers(String name, String email, String avata, String mobile) {
+    public AllUsers(String name, String email, String avata, String mobile,Status status) {
         this.name = name;
         this.email = email;
         this.avata = avata;
         this.mobile = mobile;
+        this.status=status;
     }
 
     public String getName() {

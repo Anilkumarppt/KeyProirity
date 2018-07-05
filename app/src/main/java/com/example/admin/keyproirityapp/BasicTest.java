@@ -236,6 +236,10 @@ public class BasicTest extends AppCompatActivity {
             }
         });
    }
+
+    public void sendImage(View view) {
+        Toast.makeText(this, "This Feature is Available in next Update", Toast.LENGTH_SHORT).show();
+    }
 }
 
 class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

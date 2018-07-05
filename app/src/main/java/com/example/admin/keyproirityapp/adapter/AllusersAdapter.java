@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.AllUsers;
+import com.example.admin.keyproirityapp.model.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -69,21 +70,33 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
 
                 username.setText(name);
                 email.setText(allUsersList.get(myViewHolder.getAdapterPosition()).getEmail());
-                if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata().equals("default")) {
-                    profileImg.setImageResource(R.drawable.default_avata);
+                if(allUsersList.get(myViewHolder.getAdapterPosition()).getAvata()!=null){
+                    if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata().equals("default")) {
+                        profileImg.setImageResource(R.drawable.default_avata);
 
-                } else {
-                    byte[] decodedString = Base64.decode(allUsersList.get(myViewHolder.getAdapterPosition()).avata, Base64.DEFAULT);
-                    Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    profileImg.setImageBitmap(src);
+                    } else {
+                        byte[] decodedString = Base64.decode(allUsersList.get(myViewHolder.getAdapterPosition()).avata, Base64.DEFAULT);
+                        Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        profileImg.setImageBitmap(src);
 
+                    }
                 }
+                else{
+                    profileImg.setImageResource(R.drawable.default_avata);
+                }
+
                 addFriend.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         String friendid = allUsersList.get(myViewHolder.getAdapterPosition()).getUid();
                         final String friendName = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
-                        boolean alreadyFrnd = checkBeforeAdd(friendid);
+                        if(friendid.equals(StaticConfig.UID)){
+                            Toast.makeText(view.getContext(), "this is your profile", Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            boolean alreadyFrnd = checkBeforeAdd(friendid);
+
+                        }
 
                         dialog.cancel();
                     }
@@ -146,16 +159,37 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
+        if(allUsersList.size()>0){
+            holder.username.setText(allUsersList.get(position).getName());
+            System.out.println(String.valueOf(allUsersList.get(position).avata));
+            if(allUsersList.get(position).getAvata()!=null){
+                if (allUsersList.get(position).getAvata().equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                    holder.profileImage.setImageResource(R.drawable.default_avata);
+                } else {
+                    byte[] decodedString = Base64.decode(allUsersList.get(position).avata, Base64.DEFAULT);
+                    Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    (holder).profileImage.setImageBitmap(src);
 
-        holder.username.setText(allUsersList.get(position).getName());
+                }
+            }
+            else {
+                holder.profileImage.setImageResource(R.drawable.default_avata);
+            }
+            if(allUsersList.get(position).status!=null){
+                boolean status=allUsersList.get(position).status.isOnline;
+                if(status==true){
+                    holder.userStatus.setText("Online");
+                    holder.userStatus.setTextColor(Color.GREEN);
+                }
+                else{
+                    holder.userStatus.setText("Offline");
+                    holder.userStatus.setTextColor(Color.RED);
+                }
 
-        if (allUsersList.get(position).getAvata().equals("default")) {
-            holder.profileImage.setImageResource(R.drawable.default_avata);
-        } else {
-            byte[] decodedString = Base64.decode(allUsersList.get(position).avata, Base64.DEFAULT);
-            Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            (holder).profileImage.setImageBitmap(src);
-
+            }
+            else {
+                holder.userStatus.setText("Offline");
+            }
         }
 
 
@@ -193,7 +227,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
             this.mView = itemView;
             username = itemView.findViewById(R.id.txt_contactName);
             profileImage = itemView.findViewById(R.id.profile_pic);
-            //  userStatus=itemView.findViewById(R.id.txt_contacStatus);
+             userStatus=itemView.findViewById(R.id.txt_contacStatus);
             layout = itemView.findViewById(R.id.layoutAudio);
         }
     }
