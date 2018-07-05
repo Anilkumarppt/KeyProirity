@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFC50C</color>
+    <color name="colorPrimaryDark">#E5B009</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="colorAccent">#C62828</color>
+    <color name="blue">#03A9F4</color>
+    <color name="facebook">#3F5996</color>
+    <color name="twitter">#29c5F6</color>
+    <color name="googlered">#D03E2F</color>
+    <color name="trasnparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="edittextbackgournd">#dadada</color>
+    <color name="GreyTransparent">#55dadada</color>
+    <color name="Buttoncolor">#3F5666</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="subject">#111111</color>
+    <color name="timestamp">#4285f4</color>
+    <color name="message">#7a7a7a</color>
+    <color name="from">#000000</color>
+    <color name="icon_tint_normal">#7a7a7a</color>
+    <color name="icon_tint_selected">#fed776</color>
+    <color name="row_activated">#e0e0e0</color>
+    <color name="bg_action_mode">#757575</color>
+    <color name="bg_circle_default">#666666</color>
+    <color name="startblue">#E5B009</color>
+    <color name="colorSecondaryText">#34495e</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="colorIndivateTab">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="colorCardView">#f7f7f7</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_500">#a4a4a4</color>
+    <color name="grey_800">#212121</color>
+</resources>

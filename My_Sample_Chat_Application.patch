@@ -1,0 +1,2275 @@
+Index: app/src/main/java/com/example/admin/keyproirityapp/adapter/AllusersAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/adapter/AllusersAdapter.java	(date 1530789212642)
++++ app/src/main/java/com/example/admin/keyproirityapp/adapter/AllusersAdapter.java	(date 1530789212642)
+@@ -0,0 +1,200 @@
++package com.example.admin.keyproirityapp.adapter;
++
++import android.app.Activity;
++import android.app.Dialog;
++import android.content.Context;
++import android.graphics.Bitmap;
++import android.graphics.BitmapFactory;
++import android.graphics.Color;
++import android.graphics.drawable.ColorDrawable;
++import android.support.annotation.NonNull;
++import android.support.v7.widget.RecyclerView;
++import android.util.Base64;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.view.ViewGroup;
++import android.widget.Button;
++import android.widget.LinearLayout;
++import android.widget.TextView;
++import android.widget.Toast;
++
++import com.example.admin.keyproirityapp.R;
++import com.example.admin.keyproirityapp.database.StaticConfig;
++import com.example.admin.keyproirityapp.model.AllUsers;
++import com.google.android.gms.tasks.OnCompleteListener;
++import com.google.android.gms.tasks.Task;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.FirebaseDatabase;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.ArrayList;
++import java.util.List;
++
++import de.hdodenhof.circleimageview.CircleImageView;
++
++public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyViewHolder> {
++    public List<AllUsers> allUsersList;
++    public List<String> allusersString;
++    Context ctx;
++    Activity activity;
++    View view;
++    Dialog dialog;
++
++    public AllusersAdapter(List<String> allusersString) {
++        this.allusersString = allusersString;
++    }
++
++    public AllusersAdapter(Activity context, List<AllUsers> allUsersList) {
++        this.activity = context;
++        this.allUsersList = allUsersList;
++    }
++
++    @NonNull
++    @Override
++    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
++        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.allusersitem, parent, false);
++        final MyViewHolder myViewHolder = new MyViewHolder(view);
++        dialog = new Dialog(activity);
++        dialog.setContentView(R.layout.dialog_friend);
++        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
++        myViewHolder.layout.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View view) {
++                TextView username = dialog.findViewById(R.id.dialog_name);
++                TextView email = dialog.findViewById(R.id.dialog_email);
++                CircleImageView profileImg = dialog.findViewById(R.id.dialog_userImg);
++                String name = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
++                final Button addFriend = dialog.findViewById(R.id.dialog__addfriend);
++
++                username.setText(name);
++                email.setText(allUsersList.get(myViewHolder.getAdapterPosition()).getEmail());
++                if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata().equals("default")) {
++                    profileImg.setImageResource(R.drawable.default_avata);
++
++                } else {
++                    byte[] decodedString = Base64.decode(allUsersList.get(myViewHolder.getAdapterPosition()).avata, Base64.DEFAULT);
++                    Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
++                    profileImg.setImageBitmap(src);
++
++                }
++                addFriend.setOnClickListener(new View.OnClickListener() {
++                    @Override
++                    public void onClick(View view) {
++                        String friendid = allUsersList.get(myViewHolder.getAdapterPosition()).getUid();
++                        final String friendName = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
++                        boolean alreadyFrnd = checkBeforeAdd(friendid);
++
++                        dialog.cancel();
++                    }
++                });
++                dialog.show();
++
++            }
++        });
++
++        //dialog.setContentView(R.layout.);
++
++        return myViewHolder;
++    }
++
++    private boolean checkBeforeAdd(String id) {
++        final String friendId = id;
++        FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(DataSnapshot dataSnapshot) {
++                if(dataSnapshot.exists()){
++                    int count = 0;
++                    for (DataSnapshot dsp : dataSnapshot.getChildren()) {
++                        String key = dsp.getValue().toString();
++                        if (key.equals(friendId)) {
++                            count++;
++                            break;
++                        }
++                    }
++                    if (count >= 1) {
++                        Toast.makeText(activity, "already a friend", Toast.LENGTH_SHORT).show();
++                    } else {
++                        addFriendToDB(friendId);
++                    }
++                }
++                else{
++                    addFriendToDB(friendId);
++                }
++
++            }
++
++            @Override
++            public void onCancelled(DatabaseError databaseError) {
++                }
++        });
++        return true;
++    }
++
++    private void addFriendToDB(String friendId) {
++        FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(friendId).addOnCompleteListener(new OnCompleteListener<Void>() {
++            @Override
++            public void onComplete(@NonNull Task<Void> task) {
++                if (task.isSuccessful()) {
++                    Toast.makeText(activity, "Sucessfully Added to FriendList", Toast.LENGTH_SHORT).show();
++                } else {
++                    Toast.makeText(activity, "failed to add", Toast.LENGTH_SHORT).show();
++                }
++            }
++        });
++    }
++
++    @Override
++    public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
++
++        holder.username.setText(allUsersList.get(position).getName());
++
++        if (allUsersList.get(position).getAvata().equals("default")) {
++            holder.profileImage.setImageResource(R.drawable.default_avata);
++        } else {
++            byte[] decodedString = Base64.decode(allUsersList.get(position).avata, Base64.DEFAULT);
++            Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
++            (holder).profileImage.setImageBitmap(src);
++
++        }
++
++
++        //         holder.userStatus.setText("Hi!!!! I am Using Chat App");
++        /* holder.setUserProfilePic(ctx,"userprofilepic");
++         holder.layout.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View view) {
++                Intent chatIntent=new Intent(ctx, BasicTest.class);
++                chatIntent.putExtra("Visit_userid",allUsersList.get(holder.getAdapterPosition()).getUid());
++                chatIntent.putExtra("user_name",allUsersList.get(holder.getAdapterPosition()).getName());
++                chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++                ctx.startActivity(chatIntent);
++            }
++        });
++        *///  Picasso.with(ctx).load("userprofilepic").placeholder(R.drawable.default_avata).into(holder.profileImage);
++
++        //holder.profileImage.setImageResource(R.drawable.default_avata);
++    }
++
++    @Override
++    public int getItemCount() {
++        return allUsersList.size();
++    }
++
++    public class MyViewHolder extends RecyclerView.ViewHolder {
++        View mView;
++        TextView username, userStatus;
++        LinearLayout layout;
++
++        final CircleImageView profileImage;
++
++        public MyViewHolder(View itemView) {
++            super(itemView);
++            this.mView = itemView;
++            username = itemView.findViewById(R.id.txt_contactName);
++            profileImage = itemView.findViewById(R.id.profile_pic);
++            //  userStatus=itemView.findViewById(R.id.txt_contacStatus);
++            layout = itemView.findViewById(R.id.layoutAudio);
++        }
++    }
++}
+Index: app/src/main/java/com/example/admin/keyproirityapp/ui/AllUsersActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/ui/AllUsersActivity.java	(date 1530788191918)
++++ app/src/main/java/com/example/admin/keyproirityapp/ui/AllUsersActivity.java	(date 1530788191918)
+@@ -0,0 +1,168 @@
++package com.example.admin.keyproirityapp.ui;
++
++import android.os.Bundle;
++import android.support.v7.app.AppCompatActivity;
++import android.support.v7.widget.DividerItemDecoration;
++import android.support.v7.widget.LinearLayoutManager;
++import android.support.v7.widget.RecyclerView;
++import android.support.v7.widget.Toolbar;
++import android.widget.Toast;
++
++import com.example.admin.keyproirityapp.R;
++import com.example.admin.keyproirityapp.adapter.AllusersAdapter;
++import com.example.admin.keyproirityapp.database.StaticConfig;
++import com.example.admin.keyproirityapp.model.AllUsers;
++import com.google.firebase.auth.FirebaseUser;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.FirebaseDatabase;
++import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.Iterator;
++import java.util.List;
++
++public class AllUsersActivity extends AppCompatActivity {
++
++    Query query;
++    RecyclerView recyclerView;
++    Toolbar allusersToolbar;
++    private DatabaseReference allUsersDatabaseref;
++    AllusersAdapter myAdapter;
++    List<AllUsers> listUsers;
++    List<String> usersId;
++    private ArrayList<String> listFriendID;
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        usersId=new ArrayList<>();
++        listFriendID=new ArrayList<>();
++        setContentView(R.layout.activity_all_users_list);
++        allusersToolbar=findViewById(R.id.allusers_appbar);
++        setSupportActionBar(allusersToolbar);
++        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++        getSupportActionBar().setTitle("All Users");
++        recyclerView=findViewById(R.id.allusers_recyclerview);
++        recyclerView.setHasFixedSize(true);
++        recyclerView.setLayoutManager(new LinearLayoutManager(this));
++        recyclerView.setAdapter(myAdapter);
++        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
++         //loadData();
++    }
++
++    private void loadData() {
++        allUsersDatabaseref = FirebaseDatabase.getInstance().getReference();
++        listUsers = new ArrayList<>();
++        myAdapter = new AllusersAdapter(AllUsersActivity.this, listUsers);
++         DatabaseReference reference= FirebaseDatabase.getInstance().getReference().child("user");
++        reference.addValueEventListener(
++                new ValueEventListener() {
++                    @Override
++                    public void onDataChange(DataSnapshot dataSnapshot) {
++                        listUsers.clear();
++                                showData( dataSnapshot);
++                                }
++
++                    @Override
++                    public void onCancelled(DatabaseError databaseError) {
++
++                    }
++                }
++        );
++        recyclerView.setAdapter(myAdapter);
++ }
++
++    private void showData(final DataSnapshot dataSnapshot) {
++        if(dataSnapshot.exists()){
++            for(DataSnapshot dsp:dataSnapshot.getChildren()){
++                AllUsers usersList=new AllUsers();
++                String key= dsp.getKey().toString();
++                usersList.setUid(key);
++                usersId.add(key);
++                usersList.setName(dsp.child("name").getValue(String.class));
++                usersList.setMobile(dsp.child("mobile").getValue(String.class));
++                usersList.setAvata(dsp.child("avata").getValue(String.class));
++                usersList.setEmail(dsp.child("email").getValue(String .class));
++                    listUsers.add(usersList);
++            }
++            //removeDuplicate();
++//            getFriendsId();
++            recyclerView.setAdapter(myAdapter);
++        }
++            myAdapter.notifyDataSetChanged();
++    }
++    private void getFriendsId(){
++
++        FirebaseDatabase.getInstance().getReference().child("friend"+"/"+ StaticConfig.UID).addValueEventListener(new ValueEventListener() {
++            @Override
++            public void onDataChange(DataSnapshot dataSnapshot) {
++                if (dataSnapshot.getValue() != null) {
++                    for(DataSnapshot dsp:dataSnapshot.getChildren()){
++                        String frndid=dsp.getValue(String.class);
++                        System.out.print("frined id"+frndid);
++                        listFriendID.add(frndid);
++
++                    }
++                    //                  getAllFriendInfo(0);
++                } else {
++
++//                    dialogFindAllFriend.dismiss();
++                }
++                compareToList();
++            }
++
++            @Override
++            public void onCancelled(DatabaseError databaseError) {
++
++            }
++        });
++    }
++    private void compareToList(){
++        if(usersId.size()>0 && listFriendID.size()>0){
++            for(int i=0;i<=usersId.size();i++){
++                for(int j=0;j<listFriendID.size();j++){
++                    if(listFriendID.get(i).contains(usersId.get(i))){
++                        Toast.makeText(this, "Already a friend", Toast.LENGTH_SHORT).show();
++                    }
++                    else {
++
++                    }
++                }
++            }
++        }
++    }
++    private void removeDuplicate() {
++       /* AllUsers allUsersModel=new AllUsers();
++        HashSet<String> hs=new HashSet<String >();
++        for(int i=0;i<listUsers.size();i++){
++            hs.add(listUsers.get(i).getName()+","+listUsers.get(i).getUid()+","+listUsers.get(i).getAvata());
++        }
++        listUsers.clear();
++        String allUsers[]=null;
++        for(String s: hs){
++            allUsers=s.split(",");
++            allUsersModel.setUsername(allUsers[0]);
++            allUsersModel.setUid(allUsers[1]);
++            allUsersModel.setUserprofilepic(allUsers[2]);
++            Toast.makeText(this, allUsersModel.getUsername(), Toast.LENGTH_SHORT).show();
++            listUsers.add(allUsersModel);
++        }
++*/    }
++
++
++    @Override
++    protected void onStop() {
++        super.onStop();
++         }
++    @Override
++    protected void onStart() {
++        super.onStart();
++        loadData();
++        }
++
++    }
+Index: app/src/main/java/com/example/admin/keyproirityapp/util/GetAllFriends.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/util/GetAllFriends.java	(date 1530767441943)
++++ app/src/main/java/com/example/admin/keyproirityapp/util/GetAllFriends.java	(date 1530767441943)
+@@ -0,0 +1,82 @@
++package com.example.admin.keyproirityapp.util;
++
++import com.example.admin.keyproirityapp.database.FriendDB;
++import com.example.admin.keyproirityapp.database.StaticConfig;
++import com.example.admin.keyproirityapp.model.Friend;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.FirebaseDatabase;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.List;
++
++public class GetAllFriends {
++    String friendId;
++    boolean isFriend;
++    List<Friend> friendList;
++    List<String> listFriendID;
++
++    public GetAllFriends(String friendId) {
++        this.friendId = friendId;
++    }
++    private void getListFriendUId() {
++        FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(DataSnapshot dataSnapshot) {
++                if (dataSnapshot.getValue() != null) {
++                    HashMap mapRecord = (HashMap) dataSnapshot.getValue();
++                    Iterator listKey = mapRecord.keySet().iterator();
++                    while (listKey.hasNext()) {
++                        String key = listKey.next().toString();
++                        listFriendID.add(mapRecord.get(key).toString());
++                    }
++  //                  getAllFriendInfo(0);
++                } else {
++//                    dialogFindAllFriend.dismiss();
++                }
++            }
++
++            @Override
++            public void onCancelled(DatabaseError databaseError) {
++            }
++        });
++    }
++/*
++    private void getAllFriendInfo(final int index) {
++        if (index == listFriendID.size()) {
++            //save list friend
++            adapter.notifyDataSetChanged();
++            dialogFindAllFriend.dismiss();
++            mSwipeRefreshLayout.setRefreshing(false);
++            detectFriendOnline.start();
++        } else {
++            final String id = listFriendID.get(index);
++            FirebaseDatabase.getInstance().getReference().child("user/" + id).addListenerForSingleValueEvent(new ValueEventListener() {
++                @Override
++                public void onDataChange(DataSnapshot dataSnapshot) {
++                    if (dataSnapshot.getValue() != null) {
++                        Friend user = new Friend();
++                        HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
++                        user.name = (String) mapUserInfo.get("name");
++                        user.email = (String) mapUserInfo.get("email");
++                        user.avata = (String) mapUserInfo.get("avata");
++                        user.id = id;
++                        user.idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
++                        dataListFriend.getListFriend().add(user);
++                        FriendDB.getInstance(getContext()).addFriend(user);
++                    }
++                    getAllFriendInfo(index + 1);
++                }
++
++                @Override
++                public void onCancelled(DatabaseError databaseError) {
++
++                }
++            });
++        }
++    }
++*/
++
++}
+Index: app/src/main/java/com/example/admin/keyproirityapp/util/StaticConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/util/StaticConfig.java	(date 1530695810338)
++++ app/src/main/java/com/example/admin/keyproirityapp/util/StaticConfig.java	(date 1530695810338)
+@@ -0,0 +1,10 @@
++package com.example.admin.keyproirityapp.util;
++
++public class StaticConfig {
++    public static final String FIREBASEROOTUSER="user";
++    public static final String FIREBASEGROUP="group";
++    public static final String FIREBASEMESSAGE="message";
++    public static final String FIREBASEFRIEND="group";
++
++
++}
+Index: app/src/main/java/com/example/admin/keyproirityapp/BasicTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/BasicTest.java	(date 1530709063810)
++++ app/src/main/java/com/example/admin/keyproirityapp/BasicTest.java	(date 1530709063810)
+@@ -0,0 +1,341 @@
++package com.example.admin.keyproirityapp;
++
++import android.content.Context;
++import android.content.Intent;
++import android.graphics.Bitmap;
++import android.graphics.BitmapFactory;
++import android.os.Bundle;
++import android.support.v7.app.ActionBar;
++import android.support.v7.app.AppCompatActivity;
++import android.support.v7.widget.LinearLayoutManager;
++import android.support.v7.widget.RecyclerView;
++import android.support.v7.widget.Toolbar;
++import android.util.Base64;
++import android.view.LayoutInflater;
++import android.view.MenuItem;
++import android.view.View;
++import android.view.ViewGroup;
++import android.view.WindowManager;
++import android.widget.EditText;
++import android.widget.ImageButton;
++import android.widget.TextView;
++import android.widget.Toast;
++
++import com.example.admin.keyproirityapp.database.FriendDB;
++import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
++import com.example.admin.keyproirityapp.database.StaticConfig;
++import com.example.admin.keyproirityapp.model.Consersation;
++import com.example.admin.keyproirityapp.model.Message;
++import com.example.admin.keyproirityapp.model.User;
++import com.google.firebase.database.ChildEventListener;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.FirebaseDatabase;
++import com.google.firebase.database.ValueEventListener;
++import com.squareup.picasso.Callback;
++import com.squareup.picasso.NetworkPolicy;
++import com.squareup.picasso.Picasso;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++
++import de.hdodenhof.circleimageview.CircleImageView;
++
++public class BasicTest extends AppCompatActivity {
++    public static final int VIEW_TYPE_USER_MESSAGE = 0;
++    public static final int VIEW_TYPE_FRIEND_MESSAGE = 1;
++    public static HashMap<String, Bitmap> bitmapAvataFriend;
++    public Bitmap bitmapAvataUser;
++    public TextView displayname, displaylastseen;
++    TextView usernametitle;
++    TextView userLastseen;
++    String frindid;
++    private RecyclerView recyclerChat;
++    private ListMessageAdapter adapter;
++    private String roomId;
++    private ArrayList<CharSequence> idFriend;
++    private Consersation consersation;
++    private ImageButton btnSend;
++    private EditText editWriteMessage;
++    public CircleImageView profilepic;
++    private LinearLayoutManager linearLayoutManager;
++    private byte[] bytearry;
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_basic_test);
++        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
++        setSupportActionBar(toolbar);
++        // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++        ActionBar actionBar = getSupportActionBar();
++        actionBar.setDisplayHomeAsUpEnabled(true);
++        actionBar.setDisplayShowCustomEnabled(true);
++        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
++        View actionbar_view = layoutInflater.inflate(R.layout.chat_custom_actionbar, null);
++        actionBar.setCustomView(actionbar_view);
++        usernametitle = findViewById(R.id.display_username);
++        userLastseen = findViewById(R.id.display_lastseen);
++        profilepic=findViewById(R.id.display_profile);
++        Intent intentData = getIntent();
++        idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
++        roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
++        String nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
++        frindid = intentData.getStringExtra("FriendId");
++
++        consersation = new Consersation();
++        String base64AvataUser = SharedPreferenceHelper.getInstance(this).getUserInfo().avata;
++        if (!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
++            byte[] decodedString = Base64.decode(base64AvataUser, Base64.DEFAULT);
++            bitmapAvataUser = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
++
++
++        } else {
++            bitmapAvataUser = null;
++        }
++        editWriteMessage = (EditText) findViewById(R.id.input_message);
++        if (idFriend != null && nameFriend != null) {
++            //getSupportActionBar().setTitle(nameFriend);
++            if(idFriend.size()>=2){
++
++            }
++            else{
++                showLastSeen(idFriend, nameFriend);
++            }
++
++            linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
++            recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
++            recyclerChat.setLayoutManager(linearLayoutManager);
++            adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
++            FirebaseDatabase.getInstance().getReference().child("message/" + roomId).addChildEventListener(new ChildEventListener() {
++                @Override
++                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
++                    if (dataSnapshot.getValue() != null) {
++                        HashMap mapMessage = (HashMap) dataSnapshot.getValue();
++                        Message newMessage = new Message();
++                        newMessage.idSender = (String) mapMessage.get("idSender");
++                        newMessage.idReceiver = (String) mapMessage.get("idReceiver");
++                        newMessage.text = (String) mapMessage.get("text");
++                        newMessage.timestamp = (long) mapMessage.get("timestamp");
++                        consersation.getListMessageData().add(newMessage);
++                        adapter.notifyDataSetChanged();
++                        linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
++                    }
++                }
++
++                @Override
++                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
++
++                }
++
++                @Override
++                public void onChildRemoved(DataSnapshot dataSnapshot) {
++
++                }
++
++                @Override
++                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
++
++                }
++
++                @Override
++                public void onCancelled(DatabaseError databaseError) {
++
++                }
++            });
++            recyclerChat.setAdapter(adapter);
++        }
++
++    }
++
++    private void showLastSeen(ArrayList<CharSequence> idFriend, final String nameFriend) {
++        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
++        DatabaseReference reference = firebaseDatabase.getReference("user");
++        usernametitle.setText(nameFriend);
++        reference.child(frindid).addValueEventListener(new ValueEventListener() {
++            @Override
++            public void onDataChange(DataSnapshot dataSnapshot) {
++                User user = dataSnapshot.getValue(User.class);
++                String userStatus = String.valueOf(user.status.isOnline);
++                String online = String.valueOf(user.status.timestamp);
++                if (userStatus.equals("true")) {
++                    userLastseen.setText("Online");
++                } else {
++                    LastSeenStatus getTime = new LastSeenStatus();
++                    long last_seen = Long.parseLong(online);
++                    String lastSeendisplay = getTime.getTimeAgo(last_seen, getApplicationContext()).toString();
++                    userLastseen.setText(lastSeendisplay);
++                    //  getSupportActionBar().setTitle(lastSeendisplay);
++                }
++            }
++
++            @Override
++            public void onCancelled(DatabaseError databaseError) {
++
++            }
++        });
++        }
++
++    @Override
++    public boolean onOptionsItemSelected(MenuItem item) {
++        if (item.getItemId() == android.R.id.home) {
++            Intent result = new Intent();
++            result.putExtra("idFriend", idFriend.get(0));
++            setResult(RESULT_OK, result);
++            this.finish();
++        }
++        return true;
++    }
++
++    @Override
++    public void onBackPressed() {
++        Intent result = new Intent();
++        result.putExtra("idFriend", idFriend.get(0));
++        setResult(RESULT_OK, result);
++        this.finish();
++    }
++    public void sendMessage(View view) {
++        String content = editWriteMessage.getText().toString().trim();
++        if (content.length() > 0) {
++            editWriteMessage.setText("");
++            Message newMessage = new Message();
++            newMessage.text = content;
++            newMessage.idSender = StaticConfig.UID;
++            newMessage.idReceiver = roomId;
++            newMessage.timestamp = System.currentTimeMillis();
++            FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
++        }
++    }
++
++    public void setProfilepic() {
++        FirebaseDatabase.getInstance().getReference("users").child(frindid).addValueEventListener(new ValueEventListener() {
++            @Override
++            public void onDataChange(DataSnapshot dataSnapshot) {
++                final String userThumb=dataSnapshot.child("avata").getValue().toString();
++                if(userThumb.equals("default")){
++                     }
++                else{
++                    Picasso.with(getApplicationContext()).load(userThumb).networkPolicy(NetworkPolicy.OFFLINE).placeholder(R.drawable.default_avata)
++                            .into(profilepic, new Callback() {
++                                @Override
++                                public void onSuccess() {
++
++                                }
++
++                                @Override
++                                public void onError() {
++                                        Picasso.with(getApplicationContext()).load(userThumb).placeholder(R.drawable.default_avata).into(profilepic);
++                                }
++                            });
++                }
++            }
++
++            @Override
++            public void onCancelled(DatabaseError databaseError) {
++
++            }
++        });
++   }
++}
++
++class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
++
++    private Context context;
++    private Consersation consersation;
++    private HashMap<String, Bitmap> bitmapAvata;
++    private HashMap<String, DatabaseReference> bitmapAvataDB;
++    private Bitmap bitmapAvataUser;
++
++    public ListMessageAdapter(Context context, Consersation consersation, HashMap<String, Bitmap> bitmapAvata, Bitmap bitmapAvataUser) {
++        this.context = context;
++        this.consersation = consersation;
++        this.bitmapAvata = bitmapAvata;
++        this.bitmapAvataUser = bitmapAvataUser;
++        bitmapAvataDB = new HashMap<>();
++    }
++
++    @Override
++    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
++        if (viewType == BasicTest.VIEW_TYPE_FRIEND_MESSAGE) {
++            View view = LayoutInflater.from(context).inflate(R.layout.rc_item_message_friend, parent, false);
++            return new ItemMessageFriendHolder(view);
++        } else if (viewType == BasicTest.VIEW_TYPE_USER_MESSAGE) {
++            View view = LayoutInflater.from(context).inflate(R.layout.rc_item_message_user, parent, false);
++            return new ItemMessageUserHolder(view);
++        }
++        return null;
++    }
++
++    @Override
++    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
++        if (holder instanceof ItemMessageFriendHolder) {
++            ((ItemMessageFriendHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
++            Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
++            if (currentAvata != null) {
++                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
++            } else {
++                final String id = consersation.getListMessageData().get(position).idSender;
++                if (bitmapAvataDB.get(id) == null) {
++                    bitmapAvataDB.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata"));
++                    bitmapAvataDB.get(id).addListenerForSingleValueEvent(new ValueEventListener() {
++                        @Override
++                        public void onDataChange(DataSnapshot dataSnapshot) {
++                            if (dataSnapshot.getValue() != null) {
++                                String avataStr = (String) dataSnapshot.getValue();
++                                if (!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
++                                    byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
++                                    BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
++                                } else {
++                                    BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
++                                }
++                                notifyDataSetChanged();
++                            }
++                        }
++
++                        @Override
++                        public void onCancelled(DatabaseError databaseError) {
++
++                        }
++                    });
++                }
++            }
++        } else if (holder instanceof ItemMessageUserHolder) {
++            ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
++            if (bitmapAvataUser != null) {
++                ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
++            }
++        }
++    }
++
++    @Override
++    public int getItemViewType(int position) {
++        return consersation.getListMessageData().get(position).idSender.equals(StaticConfig.UID) ? BasicTest.VIEW_TYPE_USER_MESSAGE : BasicTest.VIEW_TYPE_FRIEND_MESSAGE;
++    }
++
++    @Override
++    public int getItemCount() {
++        return consersation.getListMessageData().size();
++    }
++}
++
++class ItemMessageUserHolder extends RecyclerView.ViewHolder {
++    public TextView txtContent;
++    public CircleImageView avata;
++
++    public ItemMessageUserHolder(View itemView) {
++        super(itemView);
++        txtContent = (TextView) itemView.findViewById(R.id.textContentUser);
++        avata = (CircleImageView) itemView.findViewById(R.id.imageView2);
++    }
++}
++
++class ItemMessageFriendHolder extends RecyclerView.ViewHolder {
++    public TextView txtContent;
++    public CircleImageView avata;
++
++    public ItemMessageFriendHolder(View itemView) {
++        super(itemView);
++        txtContent = (TextView) itemView.findViewById(R.id.textContentFriend);
++        avata = (CircleImageView) itemView.findViewById(R.id.imageView3);
++    }
++}
+Index: app/src/main/java/com/example/admin/keyproirityapp/ChatActivity2.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/ChatActivity2.java	(date 1530193194261)
++++ app/src/main/java/com/example/admin/keyproirityapp/ChatActivity2.java	(date 1530193194261)
+@@ -0,0 +1,34 @@
++package com.example.admin.keyproirityapp;
++
++import android.content.Context;
++import android.os.Bundle;
++import android.support.v7.app.ActionBar;
++import android.support.v7.app.AppCompatActivity;
++import android.support.v7.widget.Toolbar;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.widget.TextView;
++
++import org.w3c.dom.Text;
++
++
++public class ChatActivity2 extends AppCompatActivity {
++
++    TextView usernameTitle,lastseen;
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_chat2);
++       /* Toolbar toolbar=findViewById(R.id.chatbar);
++        setSupportActionBar(toolbar);
++        ActionBar actionBar=getSupportActionBar();
++//        actionBar.setDisplayShowCustomEnabled(true);
++        LayoutInflater layoutInflater=(LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
++        View actionbar_view=layoutInflater.inflate(R.layout.chat_custom_actionbar,null);
++        actionBar.setCustomView(actionbar_view);
++        usernameTitle=findViewById(R.id.display_username);
++        lastseen=findViewById(R.id.display_lastseen);
++*/
++    }
++
++}
+Index: app/src/main/java/com/example/admin/keyproirityapp/LastSeenStatus.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/admin/keyproirityapp/LastSeenStatus.java	(date 1530094181567)
++++ app/src/main/java/com/example/admin/keyproirityapp/LastSeenStatus.java	(date 1530094181567)
+@@ -0,0 +1,65 @@
++package com.example.admin.keyproirityapp;
++
++import android.app.Application;
++import android.content.Context;
++
++public class LastSeenStatus extends Application {
++    /*
++     * Copyright 2012 Google Inc.
++     *
++     * Licensed under the Apache License, Version 2.0 (the "License");
++     * you may not use this file except in compliance with the License.
++     * You may obtain a copy of the License at
++     *
++     *      http://www.apache.org/licenses/LICENSE-2.0
++     *
++     * Unless required by applicable law or agreed to in writing, software
++     * distributed under the License is distributed on an "AS IS" BASIS,
++     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     * See the License for the specific language governing permissions and
++     * limitations under the License.
++     */
++
++    private static final int SECOND_MILLIS = 1000;
++    private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
++    private static final int HOUR_MILLIS = 60 * MINUTE_MILLIS;
++    private static final int DAY_MILLIS = 24 * HOUR_MILLIS;
++
++
++    public static String getTimeAgo(long time, Context ctx) {
++        if (time < 1000000000000L) {
++            // if timestamp given in seconds, convert to millis
++            time *= 1000;
++        }
++
++        long now = System.currentTimeMillis();
++        if (time > now || time <= 0) {
++            return null;
++        }
++
++        // TODO: localize
++        final long diff = now - time;
++        if (diff < MINUTE_MILLIS) {
++            return "active few seconds ago ";
++        }
++        else if (diff < 2 * MINUTE_MILLIS) {
++            return "a minute ago";
++        }
++        else if (diff < 50 * MINUTE_MILLIS) {
++            return diff / MINUTE_MILLIS + " minutes ago";
++        }
++        else if (diff < 90 * MINUTE_MILLIS) {
++            return "an hour ago";
++        }
++        else if (diff < 24 * HOUR_MILLIS) {
++            return diff / HOUR_MILLIS + " hours ago";
++        }
++        else if (diff < 48 * HOUR_MILLIS) {
++            return "yesterday";
++        }
++        else {
++            return diff / DAY_MILLIS + " days ago";
++        }
++    }
++
++}
+Index: app/src/main/res/drawable/ic_call_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_call_black_24dp.xml	(date 1527775491528)
++++ app/src/main/res/drawable/ic_call_black_24dp.xml	(date 1527775491528)
+@@ -0,0 +1,5 @@
++<vector android:alpha="0.86" android:height="24dp"
++    android:tint="#3A4012" android:viewportHeight="24.0"
++    android:viewportWidth="24.0" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
++    <path android:fillColor="#FF000000" android:pathData="M6.62,10.79c1.44,2.83 3.76,5.14 6.59,6.59l2.2,-2.2c0.27,-0.27 0.67,-0.36 1.02,-0.24 1.12,0.37 2.33,0.57 3.57,0.57 0.55,0 1,0.45 1,1V20c0,0.55 -0.45,1 -1,1 -9.39,0 -17,-7.61 -17,-17 0,-0.55 0.45,-1 1,-1h3.5c0.55,0 1,0.45 1,1 0,1.25 0.2,2.45 0.57,3.57 0.11,0.35 0.03,0.74 -0.25,1.02l-2.2,2.2z"/>
++</vector>
+Index: app/src/main/res/drawable/ic_camera_alt_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_camera_alt_black_24dp.xml	(date 1530617291706)
++++ app/src/main/res/drawable/ic_camera_alt_black_24dp.xml	(date 1530617291706)
+@@ -0,0 +1,6 @@
++<vector android:height="24dp" android:tint="#23E6FF"
++    android:viewportHeight="24.0" android:viewportWidth="24.0"
++    android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
++    <path android:fillColor="#FF000000" android:pathData="M12,12m-3.2,0a3.2,3.2 0,1 1,6.4 0a3.2,3.2 0,1 1,-6.4 0"/>
++    <path android:fillColor="#FF000000" android:pathData="M9,2L7.17,4L4,4c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2L22,6c0,-1.1 -0.9,-2 -2,-2h-3.17L15,2L9,2zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5z"/>
++</vector>
+Index: app/src/main/res/drawable/ic_message_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_message_black_24dp.xml	(date 1527775654095)
++++ app/src/main/res/drawable/ic_message_black_24dp.xml	(date 1527775654095)
+@@ -0,0 +1,5 @@
++<vector android:alpha="0.86" android:height="24dp"
++    android:tint="#3A4012" android:viewportHeight="24.0"
++    android:viewportWidth="24.0" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
++    <path android:fillColor="#FF000000" android:pathData="M20,2L4,2c-1.1,0 -1.99,0.9 -1.99,2L2,22l4,-4h14c1.1,0 2,-0.9 2,-2L22,4c0,-1.1 -0.9,-2 -2,-2zM18,14L6,14v-2h12v2zM18,11L6,11L6,9h12v2zM18,8L6,8L6,6h12v2z"/>
++</vector>
+Index: app/src/main/res/drawable/ic_videocam_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_videocam_black_24dp.xml	(date 1527847423817)
++++ app/src/main/res/drawable/ic_videocam_black_24dp.xml	(date 1527847423817)
+@@ -0,0 +1,5 @@
++<vector android:alpha="0.86" android:height="24dp"
++    android:tint="#3A4012" android:viewportHeight="24.0"
++    android:viewportWidth="24.0" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
++    <path android:fillColor="#FF000000" android:pathData="M17,10.5V7c0,-0.55 -0.45,-1 -1,-1H4c-0.55,0 -1,0.45 -1,1v10c0,0.55 0.45,1 1,1h12c0.55,0 1,-0.45 1,-1v-3.5l4,4v-11l-4,4z"/>
++</vector>
+Index: app/src/main/res/drawable-xxxhdpi/ic_send_black_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-xxxhdpi/ic_send_black_24dp.xml	(date 1517535782000)
++++ app/src/main/res/drawable-xxxhdpi/ic_send_black_24dp.xml	(date 1517535782000)
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++        android:width="24dp"
++        android:height="24dp"
++        android:viewportWidth="24.0"
++        android:viewportHeight="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M2.01,21L23,12 2.01,3 2,10l15,2 -15,2z"/>
++</vector>
+Index: app/src/main/res/layout/activity_basic_test.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_basic_test.xml	(date 1530619229085)
++++ app/src/main/res/layout/activity_basic_test.xml	(date 1530619229085)
+@@ -0,0 +1,40 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:orientation="vertical"
++    tools:context=".BasicTest">
++
++    <android.support.design.widget.AppBarLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:background="@drawable/gradient"
++        android:focusable="true"
++        android:focusableInTouchMode="true"
++        android:theme="@style/AppTheme">
++
++        <android.support.v7.widget.Toolbar
++            android:id="@+id/toolbar"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:background="@drawable/gradient"
++            android:minHeight="?attr/actionBarSize"
++            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
++            app:popupTheme="@drawable/gradient"/>
++
++    </android.support.design.widget.AppBarLayout>
++    <include
++            layout="@layout/content_basic_test"/>
++
++
++   <!-- <android.support.design.widget.FloatingActionButton
++        android:id="@+id/fab"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="bottom|end"
++        android:layout_margin="@dimen/fab_margin"
++        app:srcCompat="@android:drawable/ic_dialog_email" />-->
++
++</RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_chat.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_chat.xml	(date 1530615855661)
++++ app/src/main/res/layout/activity_chat.xml	(date 1530615855661)
+@@ -0,0 +1,33 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    tools:context=".ui.ChatActivity">
++
++    <android.support.design.widget.AppBarLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:theme="@style/AppFullScreentheme.AppBarOverlay">
++
++        <android.support.v7.widget.Toolbar
++            android:id="@+id/toolbar"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:background="@color/colorPrimary"
++            app:popupTheme="@style/AppFullScreentheme.PopupOverlay" />
++
++    </android.support.design.widget.AppBarLayout>
++
++    <include layout="@layout/content_basic_test" />
++
++    <android.support.design.widget.FloatingActionButton
++        android:id="@+id/fab"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="bottom|end"
++        android:layout_margin="@dimen/fab_margin"
++        app:srcCompat="@android:drawable/ic_dialog_email" />
++
++</RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_chat2.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_chat2.xml	(date 1530190853659)
++++ app/src/main/res/layout/activity_chat2.xml	(date 1530190853659)
+@@ -0,0 +1,63 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:background="#BDBDBD"
++    tools:context=".ChatActivity2">
++
++    <include
++        android:id="@+id/chat_bar"
++        layout="@layout/app_bar_layout" />
++
++    <android.support.v7.widget.RecyclerView
++        android:id="@+id/message_list_users"
++        android:layout_width="match_parent"
++        android:layout_height="459dp"
++        android:layout_alignParentStart="true"
++        android:layout_centerVertical="true">
++
++    </android.support.v7.widget.RecyclerView>
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_alignParentBottom="true"
++        android:layout_alignParentStart="true"
++        android:background="#FCE4EC"
++        android:orientation="horizontal"
++        android:padding="5dp">
++
++        <ImageButton
++            android:id="@+id/select_image"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:padding="5dp"
++            android:paddingBottom="3dp"
++            android:onClick="sendImage"
++            android:src="@drawable/ic_selectimage" />
++        <EditText
++            android:id="@+id/input_message"
++            android:layout_width="310dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:layout_alignParentBottom="true"
++            android:layout_alignParentEnd="true"
++            android:ems="10"
++            android:background="#FCE4EC"
++            android:hint="Write Message"
++            android:inputType="textMultiLine"
++            android:padding="10dp" />
++
++        <ImageButton
++            android:id="@+id/send_inputmessage"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:padding="5dp"
++            android:onClick="sendMessage"
++            app:srcCompat="@drawable/ic_send_black_24dp" />
++
++    </LinearLayout>
++
++</RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/app_bar_layout.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/app_bar_layout.xml	(date 1530190853667)
++++ app/src/main/res/layout/app_bar_layout.xml	(date 1530190853667)
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="utf-8"?>
++<android.support.v7.widget.Toolbar
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:id="@+id/my_toolbar"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:background="@drawable/gradient"
++    android:elevation="4dp"
++    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
++    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+\ No newline at end of file
+Index: app/src/main/res/layout/chat_custom_actionbar.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/chat_custom_actionbar.xml	(date 1530267449633)
++++ app/src/main/res/layout/chat_custom_actionbar.xml	(date 1530267449633)
+@@ -0,0 +1,33 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++
++
++    <TextView
++        android:id="@+id/display_username"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_alignParentStart="true"
++        android:layout_alignParentTop="true"
++        android:layout_marginStart="18dp"
++        android:textSize="16dp"
++        android:textStyle="bold"/>
++
++    <TextView
++        android:id="@+id/display_lastseen"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_alignStart="@+id/display_username"
++        android:layout_below="@+id/display_username"
++        android:layout_marginTop="3dp"/>
++
++    <de.hdodenhof.circleimageview.CircleImageView
++        android:id="@+id/display_profile"
++        android:layout_width="40dp"
++        android:layout_height="40dp"
++        android:layout_alignParentEnd="true"
++        android:layout_alignParentTop="true"
++        android:src="@drawable/default_avata" />
++</RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/content_basic_test.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/content_basic_test.xml	(date 1530619098590)
++++ app/src/main/res/layout/content_basic_test.xml	(date 1530619098590)
+@@ -0,0 +1,65 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    app:layout_behavior="@string/appbar_scrolling_view_behavior"
++    tools:context=".BasicTest"
++    android:layout_below="@+id/toolbar"
++    tools:showIn="@layout/activity_basic_test">
++    <android.support.v7.widget.RecyclerView
++        android:id="@+id/message_list_users"
++        android:layout_width="match_parent"
++        android:layout_height="459dp"
++        android:layout_alignParentStart="true"
++        android:layout_centerVertical="true">
++
++    </android.support.v7.widget.RecyclerView>
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_alignParentBottom="true"
++        android:layout_alignParentStart="true"
++        android:background="#FCE4EC"
++        android:layout_below="@+id/toolbar"
++        android:orientation="horizontal"
++        android:padding="5dp">
++
++        <ImageButton
++            android:id="@+id/select_image"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:padding="5dp"
++            android:paddingBottom="3dp"
++            android:onClick="sendImage"
++            android:layout_alignParentBottom="true"
++            android:src="@drawable/ic_selectimage"/>
++        <EditText
++            android:id="@+id/input_message"
++            android:layout_width="310dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:layout_alignParentBottom="true"
++            android:layout_alignParentEnd="true"
++            android:ems="10"
++            android:focusable="true"
++            android:background="#FCE4EC"
++            android:hint="Write Message"
++            android:inputType="textMultiLine"
++            android:padding="10dp" />
++
++        <ImageButton
++            android:id="@+id/send_inputmessage"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:padding="5dp"
++            android:layout_alignParentBottom="true"
++            android:layout_alignParentEnd="true"
++            android:onClick="sendMessage"
++            app:srcCompat="@drawable/ic_send_black_24dp" />
++
++    </LinearLayout>
++
++</RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/dialog_friend.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/dialog_friend.xml	(date 1530706837409)
++++ app/src/main/res/layout/dialog_friend.xml	(date 1530706837409)
+@@ -0,0 +1,65 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:orientation="vertical"
++    android:layout_width="330dp"
++    android:padding="10dp"
++    android:background="@color/trasnparent"
++    android:layout_height="wrap_content"
++    android:layout_gravity="center">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:background="@drawable/gradient"
++        android:orientation="vertical"
++        android:layout_marginTop="50dp"
++        android:layout_gravity="center_horizontal">
++
++        <TextView
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Contact Name"
++            android:id="@+id/dialog_name"
++            android:textColor="@color/white"
++            android:layout_gravity="center"
++            android:textStyle="bold"
++            android:textSize="24sp"
++            android:layout_marginTop="90dp"
++            />
++        <TextView
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Phone Number"
++            android:id="@+id/dialog_email"
++            android:textColor="@color/white"
++            android:layout_gravity="center"
++            android:textStyle="bold"
++            android:layout_marginTop="5dp"
++            android:textSize="18sp"
++            android:layout_marginBottom="10dp"/>
++        <Button
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:id="@+id/dialog__addfriend"
++            android:background="@color/white"
++            android:drawablePadding="20dp"
++            android:padding="20dp"
++            android:gravity="start"
++            android:textAlignment="textStart"
++            android:drawableLeft="@drawable/ic_message_black_24dp"
++            android:text="AddFriend"/>
++
++
++    </LinearLayout>
++    <de.hdodenhof.circleimageview.CircleImageView
++        android:layout_width="120dp"
++        android:layout_height="120dp"
++        android:layout_centerHorizontal="true"
++        android:padding="10dp"
++        android:layout_gravity="center_horizontal"
++        android:id="@+id/dialog_userImg"
++        android:layout_alignParentTop="true" />
++
++
++</RelativeLayout>
+\ No newline at end of file
+diff --git app/src/main/res/drawable/ic_send.png app/src/main/res/drawable/ic_send.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..4fa7c9c9c563f3f4ff94337e26420aeb6a8e2287
+GIT binary patch
+literal 770
+zc%17D@N?(olHy`uVBq!ia0vp^4j|0I3?%1nZ+ru!SkfJR9T^xl_H+M9WCijSl0AZa
+z85pY67#JE_7#My5g&JNkFq9fFFuY1&V6d9Oz#v{QXIG#NP@+A+C&U$G#;R}3tG)mc
+z!>a$xE5ER;{LHZSE06(1tSi2OL{@x;aG6(pVO{<Wq+rz-hzP^~{|u|Xu`K@tRj}$S
+zL>a^8|7<{AtG+U=0E&MF8w*mvw(K**@~<qbK0yRoSAon2x*=Y@r3Xl9mjw9*GgzLE
+zWqa8q`D>ZQi^fwiOU)Z3PJU;UwvAtW^m#Owj$gr~E!UQ4OWFATG}Dgx;|<itnB?v5
+z!qCAg>jC6&7I;J!1B2{32s1iq%&q_mvX^-Jy0Smu;bLWG+HC6M4AjH!>Eaj?aro`@
+z<3fiFcwBtVCkRw=&kgwc|9`tbkBZ);@*Nw$zj@Q0E4uVwkm;3%SG{U!4p*|u4Vabg
+zzD;CvyQuOd%)V1;A;0Uy3)_PXIj5?sE?kwOk`ii_FnNM=j!=<Tx{lDNPG_gOR!<F;
+zxx9wW0-VPWOz1f_qp`guJHce*Bo3Z8D!~(*TT{&9btYf65}%N>CVkW0xBSO1&lJ@t
+zpU-JNLGRD@(=5AMm@GX`HLf!+SCIEKy>M6TMW9W6u0X%QU*X67hQE{!hD+A@EIOZi
+zKJtTQSipfvY+|8n)-?CB=Hx~cv);D0NJvoTvq))7mNUy}TC8W0ll<6jM?r%&|E`jQ
+z+4tjLu@=^S<*X5Eu?B{cYKdz^NlIc#s#S7PDv)9@GB7mLH8j#SGzc*;wK6caGBDCM
+zFtjo-a6i`j97RKJeoAIqC2kF7vrVIc8YDp)g7ec#$`gxH8OqDc^)mCai<1)zQuXqS
+V(r3T3kpe1W@O1TaS?83{1OTwsAKw4~
+
+diff --git app/src/main/res/drawable/image1.png app/src/main/res/drawable/image1.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..b877de869a674f7f00ab7eb630840551206b0f7e
+GIT binary patch
+literal 42635
+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
+
+diff --git app/src/main/res/drawable-xxxhdpi/ic_selectimage.png app/src/main/res/drawable-xxxhdpi/ic_selectimage.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..9455e1c0f05baa1aef14d9313548ddede5f0565b
+GIT binary patch
+literal 1436
+zc$@*81!MY&P)<h;3K|Lk000e1NJLTq003YB003YJ1^@s6;+S_h000GJNkl<Zc-rk<
+zSx*!}5MGRUAl``yVl;+TLP+*x7gu<|2SE~86f{9i3_ci0Opy4%gQ5}@l_M%3hyT|4
+zl6oM*^z`m@&(&2)WhdF$nV$ZptE;}M?#*OGL_|cABjs|r%}Z;w+G#qaMS96D0P70<
+zz#xd&lD@vazh259v`H@s00MxB03ZN}2mk_rhyWk}hzJ0&rWV>7Q6B&{s@3Xc-D@4i
+z9W~mXAQ}tq%7@!Iq$&VPrP4k?XyAH>xT8kf6GW-aYxH?9QV>)fYFm#oSrN43PlZGP
+zh_F4>hMjyq-zxw_*dCb9LZNU=0Eo6dKZ?cTRRJK{HhqI9CjdmK<juV!b96xfh_-ES
+zW0_vH9SO$;fFP4OMiA*F9d{UyF$92y!1zr-JnHT3Js|)@H=lqVm|I?6J{Ac8Cb_1B
+z12JjD95n%eF|H}$=4g}Wgm3{!Ylk)o!b1TdT7547L`-#%wh90-3Ooe>0YCr{0Fnei
+z93oqKh&}pTCY>%8i!};zdcfo7a=9}U_P6Kr`A%fG==%ZEr*!^jM5F>h@CW!#pA+<X
+zJ)6y*)NRAi(9o%BwR*EqC`=#`F90;&@GbhR_xJao3)&v={B*4;8WG!x1RzXq2WErx
+z)!^XZMbj@vtya54*M1$QX)*;sDBKPz6)Kg=c;LWAA)tvd8t5LosqlhK5?AzQ-U-7*
+zf+i-jbQgdN0Q}~YN7EN}rjJ3`bs7M+`D41t3*>CcySa@CntnG!x<C&&&&OkQ+yxIv
+zcO>xSyzeXkx|t(%Jmv@b&58z~U+H*M2MEjwn3$ae0Lg3(Z>I(33FkJ+M3ywYqiyE^
+zfXVO)rjFA&<3T1%{FbgUf@}Fa<CIeXpc<{ayZfxqed{LdGn=ImjbLrf833q59;oh#
+z@^O=sBSwOsIbzx({Qz*;Mu#HsI}iJ9BRi#<n86*H_K0E$0GP_K-^2qtsv_{vHWx;~
+zq>6X4$zH-mRgD7jxTakIpzL)oaQe*s+pJpaQatNGssTU;s8*%eatC$YUry?z7Xa}5
+zsud}8&TI$(%qRfpO#2A<sagm@=PZUm{>>|>iT2b305{X?UiAH92qR#@>;A|wryYQ8
+zl?kHnBQ-&2Tk0oa(yYP_eG)<fsIGVcdRz#^N{SB1+0NM_pP(24H5cN5M=Bdk->+H(
+zU`4eM4|PW_0Psn*a)i!#YzqJ+b-eD2x+5<BN<SG#Z~7Il`yokVW91BzI;yuH#b2hQ
+z@Ho@aN`4*{5~k^Bzr;T(@LWpBe1W}Jr6S=G8BEBGtIQrM@VE@pshsezPeE8~P!RaH
+zb&Zr{-NmH*x=vCa=BSxD0SOqLjhT4P*>bfm=%r3s3OWhi5nNQ&h~P<d4M`mp<#BM7
+zp%&Hk(!~22%>~UIC*;^P%`$hi$Smp<=M%Ia7;dT4g;}}@a~r~@ZO8JnC8Ic(S<+G_
+zgxw5b^0?S*Q;Ku{8woH+#x}X|=zOjr-3jTLk^{iOiP^>i4fb~C61PAj!nIYyKEaxn
+zpaPHI`i+R5BY6NEjF>@NFn83@{D9&wRN$cuGPUc3!`uW3EGnpMOx8&1AbSO0A30_m
+zquK%`FT8bFdX}libyq5+H{m_82elQ44tE9s*{VQP0B{C?u!5G9ZrryTc-=ExLFvq<
+zN5E3x2$C-HOggh^oiYJH7yflZI<xUAKnftQnWAo=OQ$yV_M2gMc_)-N(y7{uK<15a
+zI)bG=6!O2Yxq>AHlkOgtIq7bf(3H>(Zt%8XAGwV1m&?ko<`ViO)W1W)J`13WQB&ix
+qq7Q8DaU>!lA|fIpA|fJUK>h(KM3&guU?PD40000<MNUMnLSTYC?TU~9
+

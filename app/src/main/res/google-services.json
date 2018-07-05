@@ -1,0 +1,142 @@
+{
+  "project_info": {
+    "project_number": "908833298732",
+    "firebase_url": "https://empyrean-bridge-187603.firebaseio.com",
+    "project_id": "empyrean-bridge-187603",
+    "storage_bucket": "empyrean-bridge-187603.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908833298732:android:74cb5425afb8b336",
+        "android_client_info": {
+          "package_name": "com.example.admin.keyproirityapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMiatkT8frOTSY_vb_8AnuZTdFjUjVJMM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908833298732:android:da4bd38aa31b4792",
+        "android_client_info": {
+          "package_name": "com.example.swati.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "908833298732-d8i35g2f2foij8i0mnjvk6tdk11k9fqd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swati.firebase",
+            "certificate_hash": "48218d11736ccd9bf66d60f7efc63e9ab4d79186"
+          }
+        },
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMiatkT8frOTSY_vb_8AnuZTdFjUjVJMM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908833298732:android:66123d74409c6508",
+        "android_client_info": {
+          "package_name": "com.example.swati.firebasechatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "908833298732-vi59ri5pt4akdunc57nriau83l574nrf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.swati.firebasechatapp",
+            "certificate_hash": "48218d11736ccd9bf66d60f7efc63e9ab4d79186"
+          }
+        },
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMiatkT8frOTSY_vb_8AnuZTdFjUjVJMM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "908833298732-dmkl36rqjpbp3pu3hh496ub903lmkrvo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
