@@ -37,7 +37,7 @@
         <activity
             android:name=".BasicTest"
             android:label="Basic"
-            android:theme="@style/AppFullScreentheme">
+            android:theme="@style/ChatTheme">
 
         </activity>
         <activity
@@ -54,7 +54,7 @@
             android:name=".ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar" />
         <activity android:name=".ui.AllUsersActivity"
-            android:theme="@style/AppFullScreentheme"
+            android:theme="@style/ChatTheme"
             android:parentActivityName=".MainActivity"/>
         <service
             android:name=".service.FriendChatService"

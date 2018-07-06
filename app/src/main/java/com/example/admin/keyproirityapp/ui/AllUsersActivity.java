@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ public class AllUsersActivity extends AppCompatActivity {
     List<AllUsers> listUsers;
     List<String> usersId;
     private ArrayList<String> listFriendID;
+    LovelyProgressDialog dialogWait;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,13 @@ public class AllUsersActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+        dialogWait=new LovelyProgressDialog(this);
+        dialogWait.setCancelable(false)
+                .setIcon(R.drawable.ic_add_friend)
+                .setTitle("Finding friend....")
+                .setTopColorRes(R.color.colorPrimary)
+                .show();
+
         allUsersDatabaseref = FirebaseDatabase.getInstance().getReference();
         listUsers = new ArrayList<>();
         myAdapter = new AllusersAdapter(AllUsersActivity.this, listUsers);
@@ -92,8 +101,10 @@ public class AllUsersActivity extends AppCompatActivity {
             }
             //removeDuplicate();
 //            getFriendsId();
+
             recyclerView.setAdapter(myAdapter);
         }
+            dialogWait.dismiss();
             myAdapter.notifyDataSetChanged();
     }
     private void getFriendsId(){

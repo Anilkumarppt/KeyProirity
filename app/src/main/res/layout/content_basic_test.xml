@@ -43,6 +43,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:ems="10"
+            android:imeOptions="actionDone"
             android:focusable="true"
             android:background="#FCE4EC"
             android:hint="Write Message"

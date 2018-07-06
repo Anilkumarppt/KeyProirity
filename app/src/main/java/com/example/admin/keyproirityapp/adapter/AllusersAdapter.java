@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.AllUsers;
-import com.example.admin.keyproirityapp.model.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -29,13 +28,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyViewHolder> {
-    public List<AllUsers> allUsersList;
+   private List<AllUsers> allUsersList;
     public List<String> allusersString;
     Context ctx;
     Activity activity;
@@ -70,7 +68,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
 
                 username.setText(name);
                 email.setText(allUsersList.get(myViewHolder.getAdapterPosition()).getEmail());
-                if(allUsersList.get(myViewHolder.getAdapterPosition()).getAvata()!=null){
+                if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata() != null) {
                     if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata().equals("default")) {
                         profileImg.setImageResource(R.drawable.default_avata);
 
@@ -80,8 +78,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                         profileImg.setImageBitmap(src);
 
                     }
-                }
-                else{
+                } else {
                     profileImg.setImageResource(R.drawable.default_avata);
                 }
 
@@ -90,10 +87,9 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                     public void onClick(View view) {
                         String friendid = allUsersList.get(myViewHolder.getAdapterPosition()).getUid();
                         final String friendName = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
-                        if(friendid.equals(StaticConfig.UID)){
+                        if (friendid.equals(StaticConfig.UID)) {
                             Toast.makeText(view.getContext(), "this is your profile", Toast.LENGTH_SHORT).show();
-                        }
-                        else{
+                        } else {
                             boolean alreadyFrnd = checkBeforeAdd(friendid);
 
                         }
@@ -116,7 +112,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
         FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
+                if (dataSnapshot.exists()) {
                     int count = 0;
                     for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                         String key = dsp.getValue().toString();
@@ -130,8 +126,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                     } else {
                         addFriendToDB(friendId);
                     }
-                }
-                else{
+                } else {
                     addFriendToDB(friendId);
                 }
 
@@ -139,7 +134,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                }
+            }
         });
         return true;
     }
@@ -159,10 +154,10 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
-        if(allUsersList.size()>0){
+        if (allUsersList.size() > 0) {
             holder.username.setText(allUsersList.get(position).getName());
             System.out.println(String.valueOf(allUsersList.get(position).avata));
-            if(allUsersList.get(position).getAvata()!=null){
+            if (allUsersList.get(position).getAvata() != null) {
                 if (allUsersList.get(position).getAvata().equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     holder.profileImage.setImageResource(R.drawable.default_avata);
                 } else {
@@ -171,24 +166,23 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                     (holder).profileImage.setImageBitmap(src);
 
                 }
-            }
-            else {
+            } else {
                 holder.profileImage.setImageResource(R.drawable.default_avata);
             }
-            if(allUsersList.get(position).status!=null){
-                boolean status=allUsersList.get(position).status.isOnline;
-                if(status==true){
+            if (allUsersList.get(position).status==null) {
+                holder.userStatus.setText("Offline");
+                holder.userStatus.setTextColor(Color.RED);
+
+            } else {
+                boolean status = allUsersList.get(position).status.isOnline;
+                if (status == true) {
+                    Toast.makeText(activity, String.valueOf(allUsersList.get(position).status.isOnline), Toast.LENGTH_SHORT).show();
                     holder.userStatus.setText("Online");
                     holder.userStatus.setTextColor(Color.GREEN);
-                }
-                else{
+                } else {
                     holder.userStatus.setText("Offline");
                     holder.userStatus.setTextColor(Color.RED);
                 }
-
-            }
-            else {
-                holder.userStatus.setText("Offline");
             }
         }
 
@@ -216,18 +210,17 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+        final CircleImageView profileImage;
         View mView;
         TextView username, userStatus;
         LinearLayout layout;
-
-        final CircleImageView profileImage;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             this.mView = itemView;
             username = itemView.findViewById(R.id.txt_contactName);
             profileImage = itemView.findViewById(R.id.profile_pic);
-             userStatus=itemView.findViewById(R.id.txt_contacStatus);
+            userStatus = itemView.findViewById(R.id.txt_contacStatus);
             layout = itemView.findViewById(R.id.layoutAudio);
         }
     }
