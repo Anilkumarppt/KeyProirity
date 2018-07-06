@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".BasicTest"
-    android:layout_below="@+id/toolbar"
+    android:background="@drawable/chatbackground"
     tools:showIn="@layout/activity_basic_test">
     <android.support.v7.widget.RecyclerView
         android:id="@+id/message_list_users"
@@ -14,53 +14,58 @@
         android:layout_height="459dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true">
-
     </android.support.v7.widget.RecyclerView>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:background="#FCE4EC"
-        android:layout_below="@+id/toolbar"
+        android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:padding="5dp">
+        android:layout_gravity="bottom"
+        android:gravity="bottom"
+        android:background="@color/trasnparent"
+        android:weightSum="1" >
 
-        <ImageButton
-            android:id="@+id/select_image"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dip"
+            android:gravity="center_vertical"
             android:padding="5dp"
-            android:paddingBottom="3dp"
-            android:onClick="sendImage"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_selectimage"/>
-        <EditText
-            android:id="@+id/input_message"
-            android:layout_width="310dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:ems="10"
-            android:imeOptions="actionDone"
-            android:focusable="true"
-            android:background="#FCE4EC"
-            android:hint="Write Message"
-            android:inputType="textMultiLine"
-            android:padding="10dp" />
+            android:paddingRight="5dp"
+            android:orientation="horizontal" >
 
-        <ImageButton
-            android:id="@+id/send_inputmessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="5dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:onClick="sendMessage"
-            app:srcCompat="@drawable/ic_send_black_24dp" />
+            <ImageButton
+                android:id="@+id/select_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:paddingRight="5dp"
+                android:paddingLeft="5dp"
+                android:onClick="sendImage"
+                android:scaleType="fitCenter"
+                android:background="@drawable/ic_camera_alt_black_24dp" />
 
+            <EditText
+                android:id="@+id/input_message"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="2.0"
+                android:paddingLeft="8dp"
+                android:ems="10"
+                android:paddingHorizontal="10dp"
+                android:hint="Write the Message"
+                android:background="@drawable/edittextbackground"
+                android:paddingRight="6dp" />
+
+            <ImageButton
+                android:id="@+id/send_inputmessage"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="sendMessage"
+                android:background="@drawable/ic_send_black_24dp" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -169,10 +170,9 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
             } else {
                 holder.profileImage.setImageResource(R.drawable.default_avata);
             }
-            if (allUsersList.get(position).status==null) {
-                holder.userStatus.setText("Offline");
-                holder.userStatus.setTextColor(Color.RED);
-
+            if (allUsersList.get(position).status.isOnline==true) {
+                holder.userStatus.setText("Online");
+                holder.userStatus.setTextColor(Color.GREEN);
             } else {
                 boolean status = allUsersList.get(position).status.isOnline;
                 if (status == true) {

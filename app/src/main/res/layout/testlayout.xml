@@ -1,0 +1,53 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_height="wrap_content">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="5dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/default_avata"/>
+        <TextView
+            android:id="@+id/textContentFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/imageView3"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="2dp"
+            android:gravity="left|center"
+            android:paddingBottom="1dp"
+            android:layout_alignStart="@+id/imageView3"
+            android:paddingLeft="15dp"
+            android:paddingRight="5dp"
+            android:paddingTop="1dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="fgfdgdf rete tretretret rtrtrwtw fgdfr grtwerwerewr ewrwerew" />
+        <TextView
+            android:id="@+id/tv_message_time_f"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/textContentFriend"
+            android:layout_marginBottom="2dp"
+            android:paddingRight="5dp"
+            android:gravity="right"
+            android:paddingBottom="1dp"
+            android:text="fgfdg"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

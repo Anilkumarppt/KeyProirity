@@ -12,6 +12,8 @@ import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.adapter.AllusersAdapter;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.AllUsers;
+import com.example.admin.keyproirityapp.model.Status;
+import com.example.admin.keyproirityapp.model.User;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -83,6 +85,7 @@ public class AllUsersActivity extends AppCompatActivity {
                     }
                 }
         );
+        reference.keepSynced(true);
         recyclerView.setAdapter(myAdapter);
  }
 
@@ -97,7 +100,10 @@ public class AllUsersActivity extends AppCompatActivity {
                 usersList.setMobile(dsp.child("mobile").getValue(String.class));
                 usersList.setAvata(dsp.child("avata").getValue(String.class));
                 usersList.setEmail(dsp.child("email").getValue(String .class));
-                    listUsers.add(usersList);
+                Long timestamp= Long.valueOf(dsp.child("status"+"/"+"timestamp").getValue(Long.class));
+                usersList.setStatus(timestamp);
+                listUsers.add(usersList);
+
             }
             //removeDuplicate();
 //            getFriendsId();

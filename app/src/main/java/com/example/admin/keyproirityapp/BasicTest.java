@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -107,6 +108,9 @@ public class BasicTest extends AppCompatActivity {
             recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
             recyclerChat.setLayoutManager(linearLayoutManager);
             adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
+            DatabaseReference chatReference=FirebaseDatabase.getInstance().getReference();
+            DatabaseReference reference=chatReference;
+            reference.child("message/" + roomId);
             FirebaseDatabase.getInstance().getReference().child("message/" + roomId).addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -158,6 +162,15 @@ public class BasicTest extends AppCompatActivity {
                 User user = dataSnapshot.getValue(User.class);
                 String userStatus = String.valueOf(user.status.isOnline);
                 String online = String.valueOf(user.status.timestamp);
+                String avata=String.valueOf(user.avata);
+                if(avata.equals(StaticConfig.STR_DEFAULT_BASE64)){
+                    profilepic.setImageResource(R.drawable.default_avata);
+                }
+                else{
+                    byte [] decodingString=Base64.decode(avata,Base64.DEFAULT);
+                    Bitmap src = BitmapFactory.decodeByteArray(decodingString, 0, decodingString.length);
+                    profilepic.setImageBitmap(src);
+                }
                 if (userStatus.equals("true")) {
                     userLastseen.setText("Online");
                 } else {
@@ -273,7 +286,8 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ItemMessageFriendHolder) {
-            ((ItemMessageFriendHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
+            String msg=consersation.getListMessageData().get(position).text;
+            ((ItemMessageFriendHolder) holder).txtContent.setText(msg);
             Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
             if (currentAvata != null) {
                 ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
