@@ -12,6 +12,8 @@ public class StaticConfig {
     public static String STR_DEFAULT_BASE64 = "default";
     public static String FIREBASE_USERROOT="users";
     public static String FIREBASE_USERCHAT="Chats";
+    public static String PERSONAL_CHAT="personalchat";
+    public static String GROUP_CHAT="groupchat";
     public static String UID = "";
     public static String INTENT_KEY_CHAT_FRIEND = "friendname";
     public static String INTENT_KEY_CHAT_AVATA = "friendavata";

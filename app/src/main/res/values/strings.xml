@@ -17,4 +17,6 @@
     <string name="enter_group_name">Enter group name</string>
     <string name="title_activity_chat2">ChatActivity2</string>
     <string name="title_activity_basic">BasicActivity</string>
+    <string name="title_activity_group_info">GroupInfo</string>
+    <string name="content_discription">Name of the group</string>
 </resources>

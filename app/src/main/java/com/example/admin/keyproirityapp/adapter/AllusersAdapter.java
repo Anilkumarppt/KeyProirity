@@ -157,7 +157,6 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         if (allUsersList.size() > 0) {
             holder.username.setText(allUsersList.get(position).getName());
-            System.out.println(String.valueOf(allUsersList.get(position).avata));
             if (allUsersList.get(position).getAvata() != null) {
                 if (allUsersList.get(position).getAvata().equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     holder.profileImage.setImageResource(R.drawable.default_avata);

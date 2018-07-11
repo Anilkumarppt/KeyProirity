@@ -38,6 +38,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -62,28 +64,23 @@ public class BasicTest extends AppCompatActivity {
     public CircleImageView profilepic;
     private LinearLayoutManager linearLayoutManager;
     private byte[] bytearry;
+    String toolbartype;
+    String chat_Type;
+    String nameFriend;
+    String groupId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_basic_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowCustomEnabled(true);
-        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View actionbar_view = layoutInflater.inflate(R.layout.chat_custom_actionbar, null);
-        actionBar.setCustomView(actionbar_view);
-        usernametitle = findViewById(R.id.display_username);
-        userLastseen = findViewById(R.id.display_lastseen);
-        profilepic=findViewById(R.id.display_profile);
         Intent intentData = getIntent();
+        chat_Type=intentData.getStringExtra(StaticConfig.PERSONAL_CHAT);
         idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
         roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
-        String nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
+        nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
         frindid = intentData.getStringExtra("FriendId");
-
+        groupId =intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
         consersation = new Consersation();
         String base64AvataUser = SharedPreferenceHelper.getInstance(this).getUserInfo().avata;
         if (!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
@@ -96,11 +93,13 @@ public class BasicTest extends AppCompatActivity {
         }
         editWriteMessage = (EditText) findViewById(R.id.input_message);
         if (idFriend != null && nameFriend != null) {
-            //getSupportActionBar().setTitle(nameFriend);
             if(idFriend.size()>=2){
-
-            }
+                    toolbartype="group";
+                    groupActionBar(toolbar);
+                    }
             else{
+                toolbartype="personal";
+                actionbarType(toolbar,toolbartype);
                 showLastSeen(idFriend, nameFriend);
             }
 
@@ -150,6 +149,32 @@ public class BasicTest extends AppCompatActivity {
             recyclerChat.setAdapter(adapter);
         }
 
+    }
+
+    private void groupActionBar(Toolbar toolbar) {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowCustomEnabled(true);
+        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View actionbar_view = layoutInflater.inflate(R.layout.group_chat_toolbar, null);
+        actionBar.setCustomView(actionbar_view);
+        TextView groupName=findViewById(R.id.display_groupname);
+        CircleImageView groupIcon=findViewById(R.id.display_groupicon);
+        groupName.setText(nameFriend);
+        groupIcon.setImageResource(R.drawable.image1);
+
+    }
+
+    private void actionbarType(Toolbar toolbar, String toolbartype) {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowCustomEnabled(true);
+        LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View actionbar_view = layoutInflater.inflate(R.layout.chat_custom_actionbar, null);
+        actionBar.setCustomView(actionbar_view);
+        usernametitle = findViewById(R.id.display_username);
+        userLastseen = findViewById(R.id.display_lastseen);
+        profilepic=findViewById(R.id.display_profile);
     }
 
     private void showLastSeen(ArrayList<CharSequence> idFriend, final String nameFriend) {
@@ -253,10 +278,23 @@ public class BasicTest extends AppCompatActivity {
     public void sendImage(View view) {
         Toast.makeText(this, "This Feature is Available in next Update", Toast.LENGTH_SHORT).show();
     }
+
+    public void viewGroupInfo(View view) {
+        Intent groupInfo=new Intent(this,GroupInfo.class);
+        groupInfo.putExtra("GroupId",groupId);
+        if(nameFriend!=null){
+            groupInfo.putExtra("GroupName",nameFriend);
+        }
+        else{
+            nameFriend="default";
+            groupInfo.putExtra("GroupName",nameFriend);
+        }
+
+        startActivity(groupInfo);
+    }
 }
 
 class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
     private Context context;
     private Consersation consersation;
     private HashMap<String, Bitmap> bitmapAvata;

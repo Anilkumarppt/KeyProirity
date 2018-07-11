@@ -219,11 +219,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     .show();*/
         }
 
-        /**
-         * TIm id cua email tren server
-         *
-         * @param email
-         */
+
         private void findIDEmail(String email) {
             dialogWait.setCancelable(false)
                     .setIcon(R.drawable.ic_add_friend)
@@ -397,6 +393,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
             FirebaseDatabase.getInstance().getReference().child("user/" + id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+
                     if (dataSnapshot.getValue() != null) {
                         Friend user = new Friend();
                         HashMap mapUserInfo = (HashMap) dataSnapshot.getValue();
@@ -410,6 +407,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     }
                     getAllFriendInfo(index + 1);
                 }
+
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
@@ -469,6 +467,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
                         idFriend.add(id);
                         intent.putExtra("FriendId",id);
+                        intent.putExtra(StaticConfig.PERSONAL_CHAT,"onetoone");
                         intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
                         BasicTest.bitmapAvataFriend = new HashMap<>();

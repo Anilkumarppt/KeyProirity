@@ -6,9 +6,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application
-        android:allowBackup="true"
         android:name=".ChatOffline"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -34,9 +35,7 @@
         <activity
             android:name=".BasicTest"
             android:label="Basic"
-            android:theme="@style/ChatTheme">
-
-        </activity>
+            android:theme="@style/ChatTheme"></activity>
         <activity
             android:name=".ui.LoginActivity"
             android:launchMode="singleTop"
@@ -50,9 +49,11 @@
         <activity
             android:name=".ui.AddGroupActivity"
             android:theme="@style/MyThemeNoActionbar" />
-        <activity android:name=".ui.AllUsersActivity"
-            android:theme="@style/ChatTheme"
-            android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".ui.AllUsersActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/ChatTheme" />
+
         <service
             android:name=".service.FriendChatService"
             android:exported="false"
@@ -62,6 +63,10 @@
             android:name=".ChatActivity2"
             android:label="@string/title_activity_chat2"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".GroupInfo"
+            android:label="@string/title_activity_group_info"
+            android:theme="@style/ChatTheme"></activity>
     </application>
 
 </manifest>
