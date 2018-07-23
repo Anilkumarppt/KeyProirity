@@ -5,9 +5,9 @@ public class UsersInformation {
     public String email;
     public String avata;
     public Status status;
-    public String  id;
+    public String id;
 
-    public void UserInformation(){
+    public void UserInformation() {
 
     }
 

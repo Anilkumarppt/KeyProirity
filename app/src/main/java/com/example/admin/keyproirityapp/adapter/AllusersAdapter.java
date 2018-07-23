@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,24 +23,28 @@ import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.AllUsers;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
+import com.yarolegovich.lovelydialog.LovelyInfoDialog;
+import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyViewHolder> {
-   private List<AllUsers> allUsersList;
+    LovelyProgressDialog dialogWait;
     public List<String> allusersString;
     Context ctx;
     Activity activity;
     View view;
     Dialog dialog;
+    private List<AllUsers> allUsersList;
+
 
     public AllusersAdapter(List<String> allusersString) {
         this.allusersString = allusersString;
@@ -55,6 +60,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         view = LayoutInflater.from(parent.getContext()).inflate(R.layout.allusersitem, parent, false);
         final MyViewHolder myViewHolder = new MyViewHolder(view);
+        dialogWait = new LovelyProgressDialog(activity);
         dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_friend);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -125,10 +131,12 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                     if (count >= 1) {
                         Toast.makeText(activity, "already a friend", Toast.LENGTH_SHORT).show();
                     } else {
-                        addFriendToDB(friendId);
+                        addFriend(friendId, true);
+                        //addFriendToDB(friendId);
                     }
                 } else {
-                    addFriendToDB(friendId);
+                    addFriend(friendId, true);
+                    //addFriendToDB(friendId);
                 }
 
             }
@@ -139,6 +147,65 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
         });
         return true;
     }
+
+    private void addFriend(final String idFriend, boolean isIdFriend) {
+
+        if (idFriend != null) {
+            if (isIdFriend) {
+                FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(idFriend)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    addFriend(idFriend, false);
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                dialogWait.dismiss();
+                                new LovelyInfoDialog(activity)
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("False")
+                                        .setMessage("False to add friend success")
+                                        .show();
+                            }
+                        });
+            } else {
+                FirebaseDatabase.getInstance().getReference().child("friend/" + idFriend).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            addFriend(null, false);
+                        }
+                    }
+                })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                dialogWait.dismiss();
+                                new LovelyInfoDialog(activity)
+                                        .setTopColorRes(R.color.colorAccent)
+                                        .setIcon(R.drawable.ic_add_friend)
+                                        .setTitle("False")
+                                        .setMessage("False to add friend success")
+                                        .show();
+                            }
+                        });
+            }
+        } else {
+            dialogWait.dismiss();
+            new LovelyInfoDialog(activity)
+                    .setTopColorRes(R.color.colorPrimary)
+                    .setIcon(R.drawable.ic_add_friend)
+                    .setTitle("Success")
+                    .setMessage("Add friend success")
+                    .show();
+        }
+    }
+
 
     private void addFriendToDB(String friendId) {
         FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).push().setValue(friendId).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -151,12 +218,21 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                 }
             }
         });
+        FirebaseDatabase.getInstance().getReference().child("friend/" + friendId).push().setValue(StaticConfig.UID).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d("Friend", "add friend to friend list of Friend");
+                }
+            }
+        });
     }
 
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         if (allUsersList.size() > 0) {
             holder.username.setText(allUsersList.get(position).getName());
+            Log.d("usernames", allUsersList.get(position).name);
             if (allUsersList.get(position).getAvata() != null) {
                 if (allUsersList.get(position).getAvata().equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     holder.profileImage.setImageResource(R.drawable.default_avata);
@@ -169,7 +245,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
             } else {
                 holder.profileImage.setImageResource(R.drawable.default_avata);
             }
-            if (allUsersList.get(position).status.isOnline==true) {
+            if (allUsersList.get(position).status.isOnline == true) {
                 holder.userStatus.setText("Online");
                 holder.userStatus.setTextColor(Color.GREEN);
             } else {

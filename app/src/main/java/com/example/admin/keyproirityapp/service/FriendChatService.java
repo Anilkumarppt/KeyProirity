@@ -24,8 +24,6 @@ import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Friend;
 import com.example.admin.keyproirityapp.model.Group;
 import com.example.admin.keyproirityapp.model.ListFriend;
-import com.example.admin.keyproirityapp.model.Group;
-import com.example.admin.keyproirityapp.model.ListFriend;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -136,7 +134,7 @@ public class FriendChatService extends Service {
                                 if (mapBitmap.get(group.id) == null) {
                                     mapBitmap.put(group.id, BitmapFactory.decodeResource(getResources(), R.drawable.ic_notify_group));
                                 }
-                                createNotify(group.groupInfo.get("name"), (String) ((HashMap) dataSnapshot.getValue()).get("text"), group.id.hashCode(), mapBitmap.get(group.id) , true);
+                                createNotify(group.groupInfo.get("name"), (String) ((HashMap) dataSnapshot.getValue()).get("text"), group.id.hashCode(), mapBitmap.get(group.id), true);
                             } else {
                                 mapMark.put(group.id, true);
                             }
@@ -185,7 +183,7 @@ public class FriendChatService extends Service {
                 .setContentTitle(name)
                 .setContentText(content)
                 .setContentIntent(pendingIntent)
-                .setVibrate(new long[] { 1000, 1000})
+                .setVibrate(new long[]{1000, 1000})
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setAutoCancel(true);
         if (isGroup) {

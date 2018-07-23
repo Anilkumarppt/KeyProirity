@@ -3,31 +3,63 @@
     android:id="@+id/layout2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:layout_marginBottom="5dp">
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="10dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imageView3"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="5dp"
-        android:src="@drawable/default_avata"/>
-    <TextView
-        android:id="@+id/textContentFriend"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_corner2"
-        android:padding="10dp"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@id/imageView3"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="20dp"
-        android:text="A"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000" />
-        android:textColor="#000" />
+        android:gravity="end|center">
 
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView3"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/default_avata" />
+
+        <ImageView
+            android:id="@+id/imageMessage"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:fitsSystemWindows="true"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textContentFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/imageView3"
+            android:background="@drawable/rounded_corner2"
+            android:gravity="right|center"
+            android:padding="10dp"
+            android:paddingBottom="1dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="5dp"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000" />
+
+        <TextView
+            android:id="@+id/timefriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/textContentFriend"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/rounded_corner2"
+            android:gravity="right|center"
+            android:paddingBottom="1dp"
+            android:paddingRight="5dp"
+            android:text="fgfdg"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
+    </RelativeLayout>
 </RelativeLayout>

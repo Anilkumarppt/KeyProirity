@@ -3,31 +3,67 @@
     android:id="@+id/layout1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
     android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp">
+    android:visibility="visible">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageView2"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="5dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="5dp"
         android:src="@drawable/default_avata" />
 
-    <TextView
+        <ImageView
+            android:id="@+id/imageMessageUser"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:fitsSystemWindows="true"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <TextView
         android:id="@+id/textContentUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_corner1"
-        android:padding="10dp"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@id/imageView2"
-        android:layout_marginEnd="5dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginStart="20dp"
-        android:text="a"
-        android:textColor="#ffffff" />
+            android:layout_alignLeft="@+id/imageView2"
+            android:layout_alignStart="@+id/imageView2"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/rounded_corner2"
+            android:gravity="left|center"
+            android:paddingBottom="1dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="5dp"
+            android:paddingTop="1dp"
+            android:text="abc"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000" />
 
+        <TextView
+            android:id="@+id/timeuser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textContentUser"
+            android:layout_below="@+id/textContentUser"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="2dp"
+            android:gravity="center_horizontal"
+            android:paddingBottom="1dp"
+            android:text="10:18"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
 </RelativeLayout>

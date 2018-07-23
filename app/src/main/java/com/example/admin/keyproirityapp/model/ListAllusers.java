@@ -1,7 +1,5 @@
 package com.example.admin.keyproirityapp.model;
 
-import com.google.firebase.auth.UserInfo;
-
 import java.util.ArrayList;
 
 public class ListAllusers {
@@ -11,13 +9,13 @@ public class ListAllusers {
         return listFriend;
     }
 
-    public ListAllusers(){
+    public ListAllusers() {
         listFriend = new ArrayList<>();
     }
 
-    public String getAvataById(String id){
-        for(UsersInformation usersInformation: listFriend){
-            if(id.equals(usersInformation.id)){
+    public String getAvataById(String id) {
+        for (UsersInformation usersInformation : listFriend) {
+            if (id.equals(usersInformation.id)) {
                 return usersInformation.avata;
             }
         }

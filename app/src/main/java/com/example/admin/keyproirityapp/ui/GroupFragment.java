@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.admin.keyproirityapp.BasicTest;
+import com.example.admin.keyproirityapp.R;
+import com.example.admin.keyproirityapp.database.FriendDB;
+import com.example.admin.keyproirityapp.database.GroupDB;
+import com.example.admin.keyproirityapp.database.StaticConfig;
+import com.example.admin.keyproirityapp.model.Group;
+import com.example.admin.keyproirityapp.model.ListFriend;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -31,12 +37,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.example.admin.keyproirityapp.R;
-import com.example.admin.keyproirityapp.database.FriendDB;
-import com.example.admin.keyproirityapp.database.GroupDB;
-import com.example.admin.keyproirityapp.database.StaticConfig;
-import com.example.admin.keyproirityapp.model.Group;
-import com.example.admin.keyproirityapp.model.ListFriend;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 
-public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerView recyclerListGroups;
     public FragGroupClickFloatButton onClickFloatButton;
     private ArrayList<Group> listGroup;
@@ -94,7 +94,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 .setTitle("Group leaving....")
                 .setTopColorRes(R.color.colorAccent);
 
-        if(listGroup.size() == 0){
+        if (listGroup.size() == 0) {
             //Ket noi server hien thi group
             mSwipeRefreshLayout.setRefreshing(true);
             getListGroup();
@@ -102,21 +102,21 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         return layout;
     }
 
-    private void getListGroup(){
-        FirebaseDatabase.getInstance().getReference().child("user/"+ StaticConfig.UID+"/group").addListenerForSingleValueEvent(new ValueEventListener() {
+    private void getListGroup() {
+        FirebaseDatabase.getInstance().getReference().child("user/" + StaticConfig.UID + "/group").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null) {
+                if (dataSnapshot.getValue() != null) {
                     HashMap mapListGroup = (HashMap) dataSnapshot.getValue();
                     Iterator iterator = mapListGroup.keySet().iterator();
-                    while (iterator.hasNext()){
+                    while (iterator.hasNext()) {
                         String idGroup = (String) mapListGroup.get(iterator.next().toString());
                         Group newGroup = new Group();
                         newGroup.id = idGroup;
                         listGroup.add(newGroup);
                     }
                     getGroupInfo(0);
-                }else{
+                } else {
                     mSwipeRefreshLayout.setRefreshing(false);
                     adapter.notifyDataSetChanged();
                 }
@@ -132,7 +132,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_EDIT_GROUP && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_EDIT_GROUP && resultCode == Activity.RESULT_OK) {
             listGroup.clear();
             ListGroupsAdapter.listFriend = null;
             GroupDB.getInstance(getContext()).dropDB();
@@ -140,27 +140,27 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         }
     }
 
-    private void getGroupInfo(final int indexGroup){
-        if(indexGroup == listGroup.size()){
+    private void getGroupInfo(final int indexGroup) {
+        if (indexGroup == listGroup.size()) {
             adapter.notifyDataSetChanged();
             mSwipeRefreshLayout.setRefreshing(false);
-        }else {
-            FirebaseDatabase.getInstance().getReference().child("group/"+listGroup.get(indexGroup).id).addListenerForSingleValueEvent(new ValueEventListener() {
+        } else {
+            FirebaseDatabase.getInstance().getReference().child("group/" + listGroup.get(indexGroup).id).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue() != null){
+                    if (dataSnapshot.getValue() != null) {
                         HashMap mapGroup = (HashMap) dataSnapshot.getValue();
                         ArrayList<String> member = (ArrayList<String>) mapGroup.get("member");
                         HashMap mapGroupInfo = (HashMap) mapGroup.get("groupInfo");
-                        for(String idMember: member){
+                        for (String idMember : member) {
                             listGroup.get(indexGroup).member.add(idMember);
                         }
                         listGroup.get(indexGroup).groupInfo.put("name", (String) mapGroupInfo.get("name"));
                         listGroup.get(indexGroup).groupInfo.put("admin", (String) mapGroupInfo.get("admin"));
                     }
                     GroupDB.getInstance(getContext()).addGroup(listGroup.get(indexGroup));
-                    Log.d("GroupFragment", listGroup.get(indexGroup).id +": " + dataSnapshot.toString());
-                    getGroupInfo(indexGroup +1);
+                    Log.d("GroupFragment", listGroup.get(indexGroup).id + ": " + dataSnapshot.toString());
+                    getGroupInfo(indexGroup + 1);
                 }
 
                 @Override
@@ -186,23 +186,23 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         switch (item.getItemId()) {
             case CONTEXT_MENU_DELETE:
                 int posGroup = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                if(((String)listGroup.get(posGroup).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                if (((String) listGroup.get(posGroup).groupInfo.get("admin")).equals(StaticConfig.UID)) {
                     Group group = listGroup.get(posGroup);
                     listGroup.remove(posGroup);
-                    if(group != null){
+                    if (group != null) {
                         deleteGroup(group, 0);
                     }
-                }else{
+                } else {
                     Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_LONG).show();
                 }
                 break;
             case CONTEXT_MENU_EDIT:
                 int posGroup1 = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                if(((String)listGroup.get(posGroup1).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                if (((String) listGroup.get(posGroup1).groupInfo.get("admin")).equals(StaticConfig.UID)) {
                     Intent intent = new Intent(getContext(), AddGroupActivity.class);
                     intent.putExtra("groupId", listGroup.get(posGroup1).id);
                     startActivityForResult(intent, REQUEST_EDIT_GROUP);
-                }else{
+                } else {
                     Toast.makeText(getActivity(), "You are not admin", Toast.LENGTH_LONG).show();
                 }
 
@@ -210,9 +210,9 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
             case CONTEXT_MENU_LEAVE:
                 int position = item.getIntent().getIntExtra(CONTEXT_MENU_KEY_INTENT_DATA_POS, -1);
-                if(((String)listGroup.get(position).groupInfo.get("admin")).equals(StaticConfig.UID)) {
+                if (((String) listGroup.get(position).groupInfo.get("admin")).equals(StaticConfig.UID)) {
                     Toast.makeText(getActivity(), "Admin cannot leave group", Toast.LENGTH_LONG).show();
-                }else{
+                } else {
                     waitingLeavingGroup.show();
                     Group groupLeaving = listGroup.get(position);
                     leaveGroup(groupLeaving);
@@ -223,9 +223,9 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         return super.onContextItemSelected(item);
     }
 
-    public void deleteGroup(final Group group, final int index){
-        if(index == group.member.size()){
-            FirebaseDatabase.getInstance().getReference().child("group/"+group.id).removeValue()
+    public void deleteGroup(final Group group, final int index) {
+        if (index == group.member.size()) {
+            FirebaseDatabase.getInstance().getReference().child("group/" + group.id).removeValue()
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -250,9 +250,9 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     .show();
                         }
                     })
-                    ;
-        }else{
-            FirebaseDatabase.getInstance().getReference().child("user/"+group.member.get(index)+"/group/"+group.id).removeValue()
+            ;
+        } else {
+            FirebaseDatabase.getInstance().getReference().child("user/" + group.member.get(index) + "/group/" + group.id).removeValue()
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -278,8 +278,8 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     }
 
-    public void leaveGroup(final Group group){
-        FirebaseDatabase.getInstance().getReference().child("group/"+group.id+"/member")
+    public void leaveGroup(final Group group) {
+        FirebaseDatabase.getInstance().getReference().child("group/" + group.id + "/member")
                 .orderByValue().equalTo(StaticConfig.UID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -295,16 +295,16 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                                     .show();
                         } else {
                             String memberIndex = "";
-                            ArrayList<String> result = ((ArrayList<String>)dataSnapshot.getValue());
-                            for(int i = 0; i < result.size(); i++){
-                                if(result.get(i) != null){
+                            ArrayList<String> result = ((ArrayList<String>) dataSnapshot.getValue());
+                            for (int i = 0; i < result.size(); i++) {
+                                if (result.get(i) != null) {
                                     memberIndex = String.valueOf(i);
                                 }
                             }
 
                             FirebaseDatabase.getInstance().getReference().child("user").child(StaticConfig.UID)
                                     .child("group").child(group.id).removeValue();
-                            FirebaseDatabase.getInstance().getReference().child("group/"+group.id+"/member")
+                            FirebaseDatabase.getInstance().getReference().child("group/" + group.id + "/member")
                                     .child(memberIndex).removeValue()
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
@@ -349,10 +349,11 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     }
 
-    public class FragGroupClickFloatButton implements View.OnClickListener{
+    public class FragGroupClickFloatButton implements View.OnClickListener {
 
         Context context;
-        public FragGroupClickFloatButton getInstance(Context context){
+
+        public FragGroupClickFloatButton getInstance(Context context) {
             this.context = context;
             return this;
         }
@@ -363,13 +364,14 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         }
     }
 }
+
 class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ArrayList<Group> listGroup;
     public static ListFriend listFriend = null;
     private Context context;
 
-    public ListGroupsAdapter(Context context,ArrayList<Group> listGroup){
+    public ListGroupsAdapter(Context context, ArrayList<Group> listGroup) {
         this.context = context;
         this.listGroup = listGroup;
     }
@@ -383,7 +385,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final String groupName = listGroup.get(position).groupInfo.get("name");
-        if(groupName != null && groupName.length() > 0) {
+        if (groupName != null && groupName.length() > 0) {
             ((ItemGroupViewHolder) holder).txtGroupName.setText(groupName);
             ((ItemGroupViewHolder) holder).iconGroup.setText((groupName.charAt(0) + "").toUpperCase());
         }
@@ -394,31 +396,31 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view.getParent().showContextMenuForChild(view);
             }
         });
-        ((RelativeLayout)((ItemGroupViewHolder) holder).txtGroupName.getParent()).setOnClickListener(new View.OnClickListener() {
+        ((RelativeLayout) ((ItemGroupViewHolder) holder).txtGroupName.getParent()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(listFriend == null){
+                if (listFriend == null) {
                     listFriend = FriendDB.getInstance(context).getListFriend();
                 }
                 Intent intent = new Intent(context, BasicTest.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
                 ArrayList<CharSequence> idFriend = new ArrayList<>();
                 BasicTest.bitmapAvataFriend = new HashMap<>();
-                for(String id : listGroup.get(position).member) {
+                for (String id : listGroup.get(position).member) {
                     idFriend.add(id);
                     String avata = listFriend.getAvataById(id);
-                    if(!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                    if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                         byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
                         BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
-                    }else if(avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                    } else if (avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                         BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
-                    }else {
+                    } else {
                         BasicTest.bitmapAvataFriend.put(id, null);
                     }
                 }
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, listGroup.get(position).id);
-                intent.putExtra(StaticConfig.PERSONAL_CHAT,"group");
+                intent.putExtra(StaticConfig.PERSONAL_CHAT, "group");
                 context.startActivity(intent);
             }
         });
@@ -433,6 +435,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 class ItemGroupViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
     public TextView iconGroup, txtGroupName;
     public ImageButton btnMore;
+
     public ItemGroupViewHolder(View itemView) {
         super(itemView);
         itemView.setOnCreateContextMenuListener(this);
@@ -443,9 +446,9 @@ class ItemGroupViewHolder extends RecyclerView.ViewHolder implements View.OnCrea
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-        menu.setHeaderTitle((String) ((Object[])btnMore.getTag())[0]);
+        menu.setHeaderTitle((String) ((Object[]) btnMore.getTag())[0]);
         Intent data = new Intent();
-        data.putExtra(GroupFragment.CONTEXT_MENU_KEY_INTENT_DATA_POS, (Integer) ((Object[])btnMore.getTag())[1]);
+        data.putExtra(GroupFragment.CONTEXT_MENU_KEY_INTENT_DATA_POS, (Integer) ((Object[]) btnMore.getTag())[1]);
         menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_EDIT, Menu.NONE, "Edit group").setIntent(data);
         menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_DELETE, Menu.NONE, "Delete group").setIntent(data);
         menu.add(Menu.NONE, GroupFragment.CONTEXT_MENU_LEAVE, Menu.NONE, "Leave group").setIntent(data);

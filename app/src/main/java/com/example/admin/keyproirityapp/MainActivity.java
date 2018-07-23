@@ -12,20 +12,19 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
 
-import com.example.admin.keyproirityapp.model.AllUsers;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import  com.example.admin.keyproirityapp.database.StaticConfig;
+import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.service.ServiceUtils;
+import com.example.admin.keyproirityapp.ui.AllUsersActivity;
 import com.example.admin.keyproirityapp.ui.FriendsFragment;
 import com.example.admin.keyproirityapp.ui.GroupFragment;
 import com.example.admin.keyproirityapp.ui.LoginActivity;
 import com.example.admin.keyproirityapp.ui.UserProfileFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if(toolbar != null) {
+        if (toolbar != null) {
             setSupportActionBar(toolbar);
             getSupportActionBar().setTitle("KeyPriority");
         }
@@ -200,12 +199,11 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (id == R.id.about) {
-          startActivity(new Intent(MainActivity.this,BasicTest.class));
+            startActivity(new Intent(MainActivity.this, BasicTest.class));
             return true;
-        }
-        else if(id==R.id.allusers){
-               // startActivity(new Intent(MainActivity.this, AllUsersList.class));
-                return true;
+        } else if (id == R.id.allusers) {
+            startActivity(new Intent(MainActivity.this, AllUsersActivity.class));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -214,9 +212,11 @@ public class MainActivity extends AppCompatActivity {
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
+
         public ViewPagerAdapter(FragmentManager manager) {
             super(manager);
         }
+
         @Override
         public Fragment getItem(int position) {
             return mFragmentList.get(position);

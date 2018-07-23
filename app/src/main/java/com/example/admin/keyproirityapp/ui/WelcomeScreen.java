@@ -22,12 +22,13 @@ public class WelcomeScreen extends AppCompatActivity {
     public ProgressBar mprogressBar;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
-        Animation anim1 = AnimationUtils.loadAnimation(this,R.anim.anim);
-        ImageView img =(ImageView)findViewById(R.id.imageView);
+        Animation anim1 = AnimationUtils.loadAnimation(this, R.anim.anim);
+        ImageView img = (ImageView) findViewById(R.id.imageView);
         img.setAnimation(anim1);
         mprogressBar = (ProgressBar) findViewById(R.id.progressBar);
         ObjectAnimator anim = ObjectAnimator.ofInt(mprogressBar, "progress", 0, 100);
@@ -42,20 +43,19 @@ public class WelcomeScreen extends AppCompatActivity {
                 checkBeforeLogin();
 
             }
-        },3000);
+        }, 3000);
 
 
     }
 
     private void checkBeforeLogin() {
-        mAuth=FirebaseAuth.getInstance();
-        currentUser=mAuth.getCurrentUser();
-        if(currentUser!=null){
-            Intent loginIntent=new Intent(WelcomeScreen.this,MainActivity.class);
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            Intent loginIntent = new Intent(WelcomeScreen.this, MainActivity.class);
             startActivity(loginIntent);
-        }
-        else {
-            Intent loginIntent=new Intent(WelcomeScreen.this,LoginActivity.class);
+        } else {
+            Intent loginIntent = new Intent(WelcomeScreen.this, LoginActivity.class);
             startActivity(loginIntent);
         }
     }

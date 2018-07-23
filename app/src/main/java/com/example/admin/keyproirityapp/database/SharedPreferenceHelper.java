@@ -2,6 +2,7 @@ package com.example.admin.keyproirityapp.database;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import com.example.admin.keyproirityapp.model.User;
 
 
@@ -14,9 +15,11 @@ public class SharedPreferenceHelper {
     private static String SHARE_KEY_EMAIL = "email";
     private static String SHARE_KEY_AVATA = "avata";
     private static String SHARE_KEY_UID = "uid";
+    private static String GROUPICON = "groupIcon";
+    private static String GROUPNAME = "name";
 
-
-    private SharedPreferenceHelper() {}
+    private SharedPreferenceHelper() {
+    }
 
     public static SharedPreferenceHelper getInstance(Context context) {
         if (instance == null) {
@@ -27,6 +30,7 @@ public class SharedPreferenceHelper {
         return instance;
     }
 
+
     public void saveUserInfo(User user) {
         editor.putString(SHARE_KEY_NAME, user.name);
         editor.putString(SHARE_KEY_EMAIL, user.email);
@@ -35,7 +39,7 @@ public class SharedPreferenceHelper {
         editor.apply();
     }
 
-    public User getUserInfo(){
+    public User getUserInfo() {
         String userName = preferences.getString(SHARE_KEY_NAME, "");
         String email = preferences.getString(SHARE_KEY_EMAIL, "");
         String avatar = preferences.getString(SHARE_KEY_AVATA, "default");
@@ -48,7 +52,7 @@ public class SharedPreferenceHelper {
         return user;
     }
 
-    public String getUID(){
+    public String getUID() {
         return preferences.getString(SHARE_KEY_UID, "");
     }
 

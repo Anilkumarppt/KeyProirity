@@ -44,8 +44,8 @@ public final class FriendDB {
     }
 
 
-    public void addListFriend(ListFriend listFriend){
-        for(Friend friend: listFriend.getListFriend()){
+    public void addListFriend(ListFriend listFriend) {
+        for (Friend friend : listFriend.getListFriend()) {
             addFriend(friend);
         }
     }
@@ -65,13 +65,13 @@ public final class FriendDB {
                 listFriend.getListFriend().add(friend);
             }
             cursor.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             return new ListFriend();
         }
         return listFriend;
     }
 
-    public void dropDB(){
+    public void dropDB() {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.execSQL(SQL_DELETE_ENTRIES);
         db.execSQL(SQL_CREATE_ENTRIES);

@@ -10,13 +10,13 @@ public class ListFriend {
         return listFriend;
     }
 
-    public ListFriend(){
+    public ListFriend() {
         listFriend = new ArrayList<>();
     }
 
-    public String getAvataById(String id){
-        for(Friend friend: listFriend){
-            if(id.equals(friend.id)){
+    public String getAvataById(String id) {
+        for (Friend friend : listFriend) {
+            if (id.equals(friend.id)) {
                 return friend.avata;
             }
         }

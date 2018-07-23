@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+
 import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Friend;
@@ -56,6 +57,7 @@ public class ServiceUtils {
             context.bindService(intent, connectionServiceFriendChatForDestroy, Context.BIND_NOT_FOREGROUND);
         }
     }
+
     public static void stopRoom(Context context, final String idRoom) {
         if (isServiceFriendChatRunning(context)) {
             Intent intent = new Intent(context, FriendChatService.class);
@@ -106,8 +108,8 @@ public class ServiceUtils {
         }
     }
 
-    public static void updateUserStatus(Context context){
-        if(isNetworkConnected(context)) {
+    public static void updateUserStatus(Context context) {
+        if (isNetworkConnected(context)) {
             String uid = SharedPreferenceHelper.getInstance(context).getUID();
             if (!uid.equals("")) {
                 FirebaseDatabase.getInstance().getReference().child("user/" + uid + "/status/isOnline").setValue(true);
@@ -116,8 +118,8 @@ public class ServiceUtils {
         }
     }
 
-    public static void updateFriendStatus(Context context, ListFriend listFriend){
-        if(isNetworkConnected(context)) {
+    public static void updateFriendStatus(Context context, ListFriend listFriend) {
+        if (isNetworkConnected(context)) {
             for (Friend friend : listFriend.getListFriend()) {
                 final String fid = friend.id;
                 FirebaseDatabase.getInstance().getReference().child("user/" + fid + "/status").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -141,10 +143,10 @@ public class ServiceUtils {
     }
 
     public static boolean isNetworkConnected(Context context) {
-        try{
+        try {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             return cm.getActiveNetworkInfo() != null;
-        }catch (Exception e){
+        } catch (Exception e) {
             return true;
         }
     }

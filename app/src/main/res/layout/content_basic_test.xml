@@ -3,69 +3,89 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".BasicTest"
+    android:orientation="vertical"
     android:background="@drawable/chatbackground"
     tools:showIn="@layout/activity_basic_test">
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/message_list_users"
-        android:layout_width="match_parent"
-        android:layout_height="459dp"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true">
-    </android.support.v7.widget.RecyclerView>
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/chatroom"
+        android:layout_alignParentStart="true">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/message_list_users"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="?attr/actionBarSize"
+                app:layout_constraintBottom_toTopOf="@+id/chatroom"></android.support.v7.widget.RecyclerView>
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#000"
+        app:layout_constraintBottom_toTopOf="@+id/chatroom"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/chatroom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
         android:orientation="horizontal"
-        android:layout_gravity="bottom"
-        android:gravity="bottom"
-        android:background="@color/trasnparent"
-        android:weightSum="1" >
+        android:weightSum="10">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
+        <ImageButton
+            android:id="@+id/select_image"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dip"
-            android:gravity="center_vertical"
-            android:padding="5dp"
-            android:paddingRight="5dp"
-            android:orientation="horizontal" >
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@android:color/white"
+            android:onClick="sendImage"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_camera_alt_black_24dp" />
 
-            <ImageButton
-                android:id="@+id/select_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:paddingRight="5dp"
-                android:paddingLeft="5dp"
-                android:onClick="sendImage"
-                android:scaleType="fitCenter"
-                android:background="@drawable/ic_camera_alt_black_24dp" />
+        <EditText
+            android:id="@+id/input_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="8"
+            android:background="@android:color/white"
+            android:ems="10"
+            android:hint="Enter Message..."
+            android:inputType="textPersonName"
+            android:paddingBottom="12dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="14dp" />
 
-            <EditText
-                android:id="@+id/input_message"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="2.0"
-                android:paddingLeft="8dp"
-                android:ems="10"
-                android:paddingHorizontal="10dp"
-                android:hint="Write the Message"
-                android:background="@drawable/edittextbackground"
-                android:paddingRight="6dp" />
-
-            <ImageButton
-                android:id="@+id/send_inputmessage"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:padding="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="sendMessage"
-                android:background="@drawable/ic_send_black_24dp" />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/send_inputmessage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@android:color/white"
+            android:onClick="sendMessage"
+            android:padding="10dp"
+            android:paddingLeft="10dp"
+            android:paddingStart="10dp"
+            android:src="@drawable/ic_send_black_24dp" />
     </LinearLayout>
+
 
 </RelativeLayout>

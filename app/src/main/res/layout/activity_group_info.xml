@@ -1,6 +1,4 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:background="#FFF"
     android:layout_height="match_parent">
@@ -29,6 +27,7 @@
                 android:layout_gravity="center"
                 android:layout_width="104dp"
                 android:layout_height="104dp"
+                android:onClick="setGroupIcon"
                 android:src="@drawable/default_avata"
                 android:background="#00000000"/>
             <TextView

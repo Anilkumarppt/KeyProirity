@@ -27,16 +27,16 @@ public class AllUsers {
 
     public AllUsers() {
         status = new Status();
-        status.isOnline=status.isOnline;
-        status.timestamp=status.timestamp;
+        status.isOnline = status.isOnline;
+        status.timestamp = status.timestamp;
     }
 
-    public AllUsers(String name, String email, String avata, String mobile,Status status) {
+    public AllUsers(String name, String email, String avata, String mobile, Status status) {
         this.name = name;
         this.email = email;
         this.avata = avata;
         this.mobile = mobile;
-        this.status=status;
+        this.status = status;
 
 
     }

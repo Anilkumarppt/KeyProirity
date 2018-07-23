@@ -12,9 +12,6 @@ import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.adapter.AllusersAdapter;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.AllUsers;
-import com.example.admin.keyproirityapp.model.Status;
-import com.example.admin.keyproirityapp.model.User;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,9 +21,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class AllUsersActivity extends AppCompatActivity {
@@ -44,40 +38,40 @@ public class AllUsersActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        usersId=new ArrayList<>();
-        listFriendID=new ArrayList<>();
+        usersId = new ArrayList<>();
+        listFriendID = new ArrayList<>();
         setContentView(R.layout.activity_all_users_list);
-        allusersToolbar=findViewById(R.id.allusers_appbar);
+        allusersToolbar = findViewById(R.id.allusers_appbar);
         setSupportActionBar(allusersToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("All Users");
-        recyclerView=findViewById(R.id.allusers_recyclerview);
+        recyclerView = findViewById(R.id.allusers_recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(myAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-         //loadData();
+        //loadData();
     }
 
     private void loadData() {
-        dialogWait=new LovelyProgressDialog(this);
+        dialogWait = new LovelyProgressDialog(this);
         dialogWait.setCancelable(false)
                 .setIcon(R.drawable.ic_add_friend)
-                .setTitle("Finding friend....")
+                .setTitle("Load All Users....")
                 .setTopColorRes(R.color.colorPrimary)
                 .show();
 
         allUsersDatabaseref = FirebaseDatabase.getInstance().getReference();
         listUsers = new ArrayList<>();
         myAdapter = new AllusersAdapter(AllUsersActivity.this, listUsers);
-         DatabaseReference reference= FirebaseDatabase.getInstance().getReference().child("user");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("user");
         reference.addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         listUsers.clear();
-                                showData( dataSnapshot);
-                                }
+                        showData(dataSnapshot);
+                    }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
@@ -87,41 +81,39 @@ public class AllUsersActivity extends AppCompatActivity {
         );
         reference.keepSynced(true);
         recyclerView.setAdapter(myAdapter);
- }
+    }
 
     private void showData(final DataSnapshot dataSnapshot) {
-        if(dataSnapshot.exists()){
-            for(DataSnapshot dsp:dataSnapshot.getChildren()){
-                AllUsers usersList=new AllUsers();
-                String key= dsp.getKey().toString();
+        if (dataSnapshot.exists()) {
+            for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                AllUsers usersList = new AllUsers();
+                String key = dsp.getKey().toString();
                 usersList.setUid(key);
                 usersId.add(key);
                 usersList.setName(dsp.child("name").getValue(String.class));
                 usersList.setMobile(dsp.child("mobile").getValue(String.class));
                 usersList.setAvata(dsp.child("avata").getValue(String.class));
-                usersList.setEmail(dsp.child("email").getValue(String .class));
-                Long timestamp= Long.valueOf(dsp.child("status"+"/"+"timestamp").getValue(Long.class));
+                usersList.setEmail(dsp.child("email").getValue(String.class));
+                Long timestamp = Long.valueOf(dsp.child("status" + "/" + "timestamp").getValue(Long.class));
                 usersList.setStatus(timestamp);
                 listUsers.add(usersList);
 
             }
-            //removeDuplicate();
-//            getFriendsId();
-
             recyclerView.setAdapter(myAdapter);
         }
-            dialogWait.dismiss();
-            myAdapter.notifyDataSetChanged();
+        dialogWait.dismiss();
+        myAdapter.notifyDataSetChanged();
     }
-    private void getFriendsId(){
 
-        FirebaseDatabase.getInstance().getReference().child("friend"+"/"+ StaticConfig.UID).addValueEventListener(new ValueEventListener() {
+    private void getFriendsId() {
+
+        FirebaseDatabase.getInstance().getReference().child("friend" + "/" + StaticConfig.UID).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    for(DataSnapshot dsp:dataSnapshot.getChildren()){
-                        String frndid=dsp.getValue(String.class);
-                        System.out.print("frined id"+frndid);
+                    for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                        String frndid = dsp.getValue(String.class);
+                        System.out.print("frined id" + frndid);
                         listFriendID.add(frndid);
 
                     }
@@ -139,20 +131,21 @@ public class AllUsersActivity extends AppCompatActivity {
             }
         });
     }
-    private void compareToList(){
-        if(usersId.size()>0 && listFriendID.size()>0){
-            for(int i=0;i<=usersId.size();i++){
-                for(int j=0;j<listFriendID.size();j++){
-                    if(listFriendID.get(i).contains(usersId.get(i))){
+
+    private void compareToList() {
+        if (usersId.size() > 0 && listFriendID.size() > 0) {
+            for (int i = 0; i <= usersId.size(); i++) {
+                for (int j = 0; j < listFriendID.size(); j++) {
+                    if (listFriendID.get(i).contains(usersId.get(i))) {
                         Toast.makeText(this, "Already a friend", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    } else {
 
                     }
                 }
             }
         }
     }
+
     private void removeDuplicate() {
        /* AllUsers allUsersModel=new AllUsers();
         HashSet<String> hs=new HashSet<String >();
@@ -169,17 +162,19 @@ public class AllUsersActivity extends AppCompatActivity {
             Toast.makeText(this, allUsersModel.getUsername(), Toast.LENGTH_SHORT).show();
             listUsers.add(allUsersModel);
         }
-*/    }
+*/
+    }
 
 
     @Override
     protected void onStop() {
         super.onStop();
-         }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         loadData();
-        }
-
     }
+
+}

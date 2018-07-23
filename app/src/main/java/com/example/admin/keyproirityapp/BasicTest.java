@@ -1,153 +1,308 @@
 package com.example.admin.keyproirityapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.admin.keyproirityapp.database.FriendDB;
+import com.example.admin.keyproirityapp.adapter.ListMessageAdapter;
 import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Consersation;
 import com.example.admin.keyproirityapp.model.Message;
 import com.example.admin.keyproirityapp.model.User;
+import com.example.admin.keyproirityapp.util.ImageUtils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class BasicTest extends AppCompatActivity {
     public static final int VIEW_TYPE_USER_MESSAGE = 0;
     public static final int VIEW_TYPE_FRIEND_MESSAGE = 1;
+    private static final int TOTAL_ITEMS = 10;
     public static HashMap<String, Bitmap> bitmapAvataFriend;
     public Bitmap bitmapAvataUser;
-    public TextView displayname, displaylastseen;
+    private static final int PAGE_START = 0;
+    public CircleImageView groupIcon;
+    public CircleImageView profilepic;
     TextView usernametitle;
+
     TextView userLastseen;
-    String frindid;
+    DatabaseReference groupDB;
+    String frindid, chat_Type, nameFriend;
+    String toolbartype;
+    String groupId;
+    String baseAvata;
+    private boolean isLoading = false;
+    private boolean isLastPage = false;
+    private int TOTAL_PAGES = 10;
+    private int currentPage = 1;
+
+    private ProgressBar progressBar;
+    private ProgressDialog progressDialog;
+    private DatabaseReference messageDatabaseRef;
     private RecyclerView recyclerChat;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private ListMessageAdapter adapter;
     private String roomId;
     private ArrayList<CharSequence> idFriend;
     private Consersation consersation;
-    private ImageButton btnSend;
     private EditText editWriteMessage;
-    public CircleImageView profilepic;
     private LinearLayoutManager linearLayoutManager;
-    private byte[] bytearry;
-    String toolbartype;
-    String chat_Type;
-    String nameFriend;
-    String groupId;
+    private int PICK_IMAGE = 1;
+    private StorageReference mStorage;
+    private DatabaseReference rootRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_basic_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         Intent intentData = getIntent();
-        chat_Type=intentData.getStringExtra(StaticConfig.PERSONAL_CHAT);
+        chat_Type = intentData.getStringExtra(StaticConfig.PERSONAL_CHAT);
         idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
         roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
         nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
         frindid = intentData.getStringExtra("FriendId");
-        groupId =intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
+        groupId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
+        groupDB = FirebaseDatabase.getInstance().getReference().child("group" + "/" + groupId);
+
+        progressDialog = new ProgressDialog(this);
+
+        messageDatabaseRef = FirebaseDatabase.getInstance().getReference().child("message" + "/" + roomId);
+        messageDatabaseRef.keepSynced(true);
+
         consersation = new Consersation();
         String base64AvataUser = SharedPreferenceHelper.getInstance(this).getUserInfo().avata;
         if (!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             byte[] decodedString = Base64.decode(base64AvataUser, Base64.DEFAULT);
             bitmapAvataUser = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-
         } else {
             bitmapAvataUser = null;
         }
+
         editWriteMessage = (EditText) findViewById(R.id.input_message);
         if (idFriend != null && nameFriend != null) {
-            if(idFriend.size()>=2){
-                    toolbartype="group";
-                    groupActionBar(toolbar);
-                    }
-            else{
-                toolbartype="personal";
-                actionbarType(toolbar,toolbartype);
+            if (idFriend.size() >= 2) {
+                toolbartype = "group";
+                groupActionBar(toolbar);
+                setgorupImage();
+            } else {
+                toolbartype = "personal";
+                actionbarType(toolbar);
                 showLastSeen(idFriend, nameFriend);
             }
-
             linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
+
+            //swipeRefreshLayout = findViewById(R.id.messageswipe);
+            //  swipeRefreshLayout.setOnRefreshListener(this);
+
             recyclerChat.setLayoutManager(linearLayoutManager);
             adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
-            DatabaseReference chatReference=FirebaseDatabase.getInstance().getReference();
-            DatabaseReference reference=chatReference;
-            reference.child("message/" + roomId);
-            FirebaseDatabase.getInstance().getReference().child("message/" + roomId).addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if (dataSnapshot.getValue() != null) {
-                        HashMap mapMessage = (HashMap) dataSnapshot.getValue();
-                        Message newMessage = new Message();
-                        newMessage.idSender = (String) mapMessage.get("idSender");
-                        newMessage.idReceiver = (String) mapMessage.get("idReceiver");
-                        newMessage.text = (String) mapMessage.get("text");
-                        newMessage.timestamp = (long) mapMessage.get("timestamp");
-                        consersation.getListMessageData().add(newMessage);
-                        adapter.notifyDataSetChanged();
-                        linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
-                    }
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
             recyclerChat.setAdapter(adapter);
+/*
+           recyclerChat.addOnScrollListener(new PaginationScrollListener(linearLayoutManager) {
+
+
+               @Override
+               protected void loadMoreItems() {
+                   isLoading=true;
+                   currentPage +=1;
+                   new Handler().postDelayed(new Runnable() {
+                       @Override
+                       public void run() {
+                           loadNextPage();
+                       }
+                   }, 1000);
+
+               }
+
+               @Override
+               public int getTotalPageCount() {
+                   return TOTAL_PAGES;
+               }
+
+               @Override
+               public boolean isLastPage() {
+                   return isLastPage;
+               }
+
+               @Override
+               public boolean isLoading() {
+                   return isLoading;
+               }
+           });
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    loadFirstPage();
+                }
+            }, 1000);
+*/
+
+            loadMessages();
         }
+    }
+
+    private void loadNextPage() {
+        Query query;
+        query = messageDatabaseRef.orderByKey().limitToFirst(currentPage * TOTAL_PAGES);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Message message;
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    message = dsp.getValue(Message.class);
+                    consersation.getListMessageData().add(message);
+                }
+                adapter.addAll(consersation);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void loadFirstPage() {
+        Query query;
+        query = messageDatabaseRef.orderByKey().limitToFirst(10);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Message message;
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    message = dsp.getValue(Message.class);
+                    consersation.getListMessageData().add(message);
+                }
+                adapter.addAll(consersation);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /*private void getMessages(String nodeId) {
+        Query query;
+        if (nodeId == null) {
+            query = messageDatabaseRef.orderByKey().
+                    limitToFirst(mPostsPerPage);
+        } else
+            query = messageDatabaseRef.orderByKey().
+                    startAt(nodeId).
+                    limitToFirst(mPostsPerPage);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Message message;
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    message = dsp.getValue(Message.class);
+                    consersation.getListMessageData().add(message);
+                }
+
+                adapter.addAll(consersation);
+                mIsLoading = false;
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+*/
+    private void loadMessages() {
+        DatabaseReference reference = messageDatabaseRef;
+        Query messagequery = reference.limitToLast(TOTAL_ITEMS).orderByKey();
+        messagequery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot.getValue() != null) {
+                    HashMap mapMessage = (HashMap) dataSnapshot.getValue();
+                    String idsender = (String) mapMessage.get("idSender");
+                    String idreciver = (String) mapMessage.get("idReceiver");
+                    String message = (String) mapMessage.get("text");
+                    Long timestamp = (long) mapMessage.get("timestamp");
+                    String type = (String) mapMessage.get("contentType");
+                    Message newMessage = new Message(idsender, idreciver, message, timestamp, type);
+                    consersation.getListMessageData().add(newMessage);
+                    adapter.notifyDataSetChanged();
+                    linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
+
+                    //
+                    // swipeRefreshLayout.setRefreshing(false);
+                    Log.d("adapter size", String.valueOf(consersation.getListMessageData().size()));
+
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        recyclerChat.setAdapter(adapter);
 
     }
 
@@ -158,14 +313,14 @@ public class BasicTest extends AppCompatActivity {
         LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View actionbar_view = layoutInflater.inflate(R.layout.group_chat_toolbar, null);
         actionBar.setCustomView(actionbar_view);
-        TextView groupName=findViewById(R.id.display_groupname);
-        CircleImageView groupIcon=findViewById(R.id.display_groupicon);
-        groupName.setText(nameFriend);
-        groupIcon.setImageResource(R.drawable.image1);
+        TextView groupName = findViewById(R.id.display_groupname);
+        groupIcon = findViewById(R.id.display_groupicon);
 
+        groupName.setText(nameFriend);
+        ///setgorupImage();
     }
 
-    private void actionbarType(Toolbar toolbar, String toolbartype) {
+    private void actionbarType(Toolbar toolbar) {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowCustomEnabled(true);
@@ -174,7 +329,51 @@ public class BasicTest extends AppCompatActivity {
         actionBar.setCustomView(actionbar_view);
         usernametitle = findViewById(R.id.display_username);
         userLastseen = findViewById(R.id.display_lastseen);
-        profilepic=findViewById(R.id.display_profile);
+        profilepic = findViewById(R.id.display_profile);
+    }
+
+    private void setgorupImage() {
+        groupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    HashMap mapGroup = (HashMap) dataSnapshot.getValue();
+                    ArrayList<String> member = (ArrayList<String>) mapGroup.get("member");
+                    HashMap mapGroupInfo = (HashMap) mapGroup.get("groupInfo");
+                    String name = (String) mapGroupInfo.get("name");
+                    String avatar = (String) mapGroupInfo.get("groupIcon");
+                    setImageAvatar(getApplicationContext(), avatar);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    private void setImageAvatar(Context context, String imgBase64) {
+        try {
+            Resources res = getResources();
+            Bitmap src;
+            if (imgBase64.equals("default")) {
+                src = BitmapFactory.decodeResource(res, R.drawable.default_avata);
+            } else {
+                byte[] decodedString = Base64.decode(imgBase64, Base64.DEFAULT);
+                src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            }
+
+            groupIcon.setImageDrawable(ImageUtils.roundedImage(context, src));
+        } catch (Exception e) {
+        }
     }
 
     private void showLastSeen(ArrayList<CharSequence> idFriend, final String nameFriend) {
@@ -187,12 +386,11 @@ public class BasicTest extends AppCompatActivity {
                 User user = dataSnapshot.getValue(User.class);
                 String userStatus = String.valueOf(user.status.isOnline);
                 String online = String.valueOf(user.status.timestamp);
-                String avata=String.valueOf(user.avata);
-                if(avata.equals(StaticConfig.STR_DEFAULT_BASE64)){
+                String avata = String.valueOf(user.avata);
+                if (avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     profilepic.setImageResource(R.drawable.default_avata);
-                }
-                else{
-                    byte [] decodingString=Base64.decode(avata,Base64.DEFAULT);
+                } else {
+                    byte[] decodingString = Base64.decode(avata, Base64.DEFAULT);
                     Bitmap src = BitmapFactory.decodeByteArray(decodingString, 0, decodingString.length);
                     profilepic.setImageBitmap(src);
                 }
@@ -212,7 +410,7 @@ public class BasicTest extends AppCompatActivity {
 
             }
         });
-        }
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -232,39 +430,86 @@ public class BasicTest extends AppCompatActivity {
         setResult(RESULT_OK, result);
         this.finish();
     }
+
     public void sendMessage(View view) {
         String content = editWriteMessage.getText().toString().trim();
         if (content.length() > 0) {
             editWriteMessage.setText("");
-            Message newMessage = new Message();
-            newMessage.text = content;
-            newMessage.idSender = StaticConfig.UID;
-            newMessage.idReceiver = roomId;
-            newMessage.timestamp = System.currentTimeMillis();
-            FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
+            Message newMessage = new Message(StaticConfig.UID, roomId, content, System.currentTimeMillis(), "text");
+            messageDatabaseRef.keepSynced(true);
+            messageDatabaseRef.push().setValue(newMessage);
         }
     }
 
-    public void setProfilepic() {
-        FirebaseDatabase.getInstance().getReference("users").child(frindid).addValueEventListener(new ValueEventListener() {
+
+    public void sendImage(View view) {
+        progressBar = new ProgressBar(this);
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        galleryIntent.setType("image/*");
+        galleryIntent.setAction(Intent.ACTION_PICK);
+        startActivityForResult(Intent.createChooser(galleryIntent, "Select Picture"), PICK_IMAGE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mStorage = FirebaseStorage.getInstance().getReference();
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+            progressDialog.setTitle("Sending Image");
+            progressDialog.setMessage("Please Wait ,while your chat message is sending.....");
+            progressDialog.show();
+            Uri uri = data.getData();
+            final String imageLocation = "Photos" + "/" + roomId;
+            final String imageLocationId = imageLocation + "/" + uri.getLastPathSegment();
+            final String uniqueId = UUID.randomUUID().toString();
+            DatabaseReference userMessage_key = messageDatabaseRef.push();
+            String message_pushId = userMessage_key.getKey();
+            final StorageReference filePathMessage = mStorage.child("MessageImages").child(message_pushId + ".jpg");
+            final String downloadURl = filePathMessage.getPath();
+            filePathMessage.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        final String downLoadURL = task.getResult().getDownloadUrl().toString();
+
+                        Message imageMessage = new Message(StaticConfig.UID, roomId, downLoadURL, System.currentTimeMillis(), "media", downLoadURL);
+
+                        Map messageBodyDetails = new HashMap();
+                        DatabaseReference userMessage_key = messageDatabaseRef.push();
+                        String message_pushId = userMessage_key.getKey();
+
+                        messageBodyDetails.put(message_pushId, imageMessage);
+                        FirebaseDatabase.getInstance().getReference().child("message" + "/" + roomId).updateChildren(messageBodyDetails, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    Toast.makeText(BasicTest.this, databaseError.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                                }
+
+                                editWriteMessage.setText("");
+                                progressDialog.dismiss();
+                            }
+
+                        });
+
+                        Toast.makeText(BasicTest.this, "Picture sent successfully", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    } else {
+                        Toast.makeText(BasicTest.this, "Picture not Sent.Please try again", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                }
+            });
+        }
+    }
+
+    public void viewGroupInfo(View view) {
+        FirebaseDatabase.getInstance().getReference("group").child(groupId + "groupinfo").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final String userThumb=dataSnapshot.child("avata").getValue().toString();
-                if(userThumb.equals("default")){
-                     }
-                else{
-                    Picasso.with(getApplicationContext()).load(userThumb).networkPolicy(NetworkPolicy.OFFLINE).placeholder(R.drawable.default_avata)
-                            .into(profilepic, new Callback() {
-                                @Override
-                                public void onSuccess() {
-
-                                }
-
-                                @Override
-                                public void onError() {
-                                        Picasso.with(getApplicationContext()).load(userThumb).placeholder(R.drawable.default_avata).into(profilepic);
-                                }
-                            });
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    baseAvata = dsp.child("groupIcon").getValue(String.class);
+                    Toast.makeText(BasicTest.this, baseAvata, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -273,125 +518,26 @@ public class BasicTest extends AppCompatActivity {
 
             }
         });
-   }
-
-    public void sendImage(View view) {
-        Toast.makeText(this, "This Feature is Available in next Update", Toast.LENGTH_SHORT).show();
-    }
-
-    public void viewGroupInfo(View view) {
-        Intent groupInfo=new Intent(this,GroupInfo.class);
-        groupInfo.putExtra("GroupId",groupId);
-        if(nameFriend!=null){
-            groupInfo.putExtra("GroupName",nameFriend);
-        }
-        else{
-            nameFriend="default";
-            groupInfo.putExtra("GroupName",nameFriend);
+        Intent groupInfo = new Intent(this, GroupInfo.class);
+        groupInfo.putExtra("GroupId", groupId);
+        groupInfo.putExtra("groupIcon", baseAvata);
+        if (nameFriend != null) {
+            groupInfo.putExtra("GroupName", nameFriend);
+        } else {
+            nameFriend = "default";
+            groupInfo.putExtra("GroupName", nameFriend);
         }
 
         startActivity(groupInfo);
     }
+
+    /*@Override
+    public void onRefresh() {
+        currentPage++;
+        consersation.getListMessageData().clear();
+        loadMessages();
+        adapter.notifyDataSetChanged();
+    }*/
 }
 
-class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private Context context;
-    private Consersation consersation;
-    private HashMap<String, Bitmap> bitmapAvata;
-    private HashMap<String, DatabaseReference> bitmapAvataDB;
-    private Bitmap bitmapAvataUser;
 
-    public ListMessageAdapter(Context context, Consersation consersation, HashMap<String, Bitmap> bitmapAvata, Bitmap bitmapAvataUser) {
-        this.context = context;
-        this.consersation = consersation;
-        this.bitmapAvata = bitmapAvata;
-        this.bitmapAvataUser = bitmapAvataUser;
-        bitmapAvataDB = new HashMap<>();
-    }
-
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == BasicTest.VIEW_TYPE_FRIEND_MESSAGE) {
-            View view = LayoutInflater.from(context).inflate(R.layout.rc_item_message_friend, parent, false);
-            return new ItemMessageFriendHolder(view);
-        } else if (viewType == BasicTest.VIEW_TYPE_USER_MESSAGE) {
-            View view = LayoutInflater.from(context).inflate(R.layout.rc_item_message_user, parent, false);
-            return new ItemMessageUserHolder(view);
-        }
-        return null;
-    }
-
-    @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ItemMessageFriendHolder) {
-            String msg=consersation.getListMessageData().get(position).text;
-            ((ItemMessageFriendHolder) holder).txtContent.setText(msg);
-            Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
-            if (currentAvata != null) {
-                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
-            } else {
-                final String id = consersation.getListMessageData().get(position).idSender;
-                if (bitmapAvataDB.get(id) == null) {
-                    bitmapAvataDB.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata"));
-                    bitmapAvataDB.get(id).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.getValue() != null) {
-                                String avataStr = (String) dataSnapshot.getValue();
-                                if (!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
-                                    byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
-                                    BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
-                                } else {
-                                    BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
-                                }
-                                notifyDataSetChanged();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-        } else if (holder instanceof ItemMessageUserHolder) {
-            ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
-            if (bitmapAvataUser != null) {
-                ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
-            }
-        }
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return consersation.getListMessageData().get(position).idSender.equals(StaticConfig.UID) ? BasicTest.VIEW_TYPE_USER_MESSAGE : BasicTest.VIEW_TYPE_FRIEND_MESSAGE;
-    }
-
-    @Override
-    public int getItemCount() {
-        return consersation.getListMessageData().size();
-    }
-}
-
-class ItemMessageUserHolder extends RecyclerView.ViewHolder {
-    public TextView txtContent;
-    public CircleImageView avata;
-
-    public ItemMessageUserHolder(View itemView) {
-        super(itemView);
-        txtContent = (TextView) itemView.findViewById(R.id.textContentUser);
-        avata = (CircleImageView) itemView.findViewById(R.id.imageView2);
-    }
-}
-
-class ItemMessageFriendHolder extends RecyclerView.ViewHolder {
-    public TextView txtContent;
-    public CircleImageView avata;
-
-    public ItemMessageFriendHolder(View itemView) {
-        super(itemView);
-        txtContent = (TextView) itemView.findViewById(R.id.textContentFriend);
-        avata = (CircleImageView) itemView.findViewById(R.id.imageView3);
-    }
-}

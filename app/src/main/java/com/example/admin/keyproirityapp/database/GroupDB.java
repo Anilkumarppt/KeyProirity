@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-
 import com.example.admin.keyproirityapp.model.Group;
 
 import java.util.ArrayList;
@@ -47,9 +46,9 @@ public class GroupDB {
         }
     }
 
-    public void deleteGroup(String idGroup){
+    public void deleteGroup(String idGroup) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        db.delete(FeedEntry.TABLE_NAME, FeedEntry.COLUMN_GROUP_ID + " = " + idGroup , null);
+        db.delete(FeedEntry.TABLE_NAME, FeedEntry.COLUMN_GROUP_ID + " = " + idGroup, null);
     }
 
 
@@ -59,9 +58,9 @@ public class GroupDB {
         }
     }
 
-    public Group getGroup(String id){
+    public Group getGroup(String id) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("select * from " + GroupDB.FeedEntry.TABLE_NAME + " where " + FeedEntry.COLUMN_GROUP_ID +" = " + id, null);
+        Cursor cursor = db.rawQuery("select * from " + GroupDB.FeedEntry.TABLE_NAME + " where " + FeedEntry.COLUMN_GROUP_ID + " = " + id, null);
         Group newGroup = new Group();
         while (cursor.moveToNext()) {
             String idGroup = cursor.getString(0);

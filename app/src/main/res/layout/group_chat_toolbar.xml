@@ -19,8 +19,8 @@
         android:clickable="true"
         android:text="Sample Group"
         android:textSize="16dp"
+        android:gravity="center"
         android:background="?attr/selectableItemBackground"
-        android:layout_marginTop="15dp"
         android:textStyle="bold" />
 
 

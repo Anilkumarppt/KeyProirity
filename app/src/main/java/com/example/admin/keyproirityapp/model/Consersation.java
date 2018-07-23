@@ -5,7 +5,8 @@ import java.util.ArrayList;
 
 public class Consersation {
     private ArrayList<Message> listMessageData;
-    public Consersation(){
+
+    public Consersation() {
         listMessageData = new ArrayList<>();
     }
 

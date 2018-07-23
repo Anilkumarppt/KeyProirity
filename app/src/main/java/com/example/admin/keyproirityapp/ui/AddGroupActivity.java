@@ -127,8 +127,6 @@ public class AddGroupActivity extends AppCompatActivity {
         recyclerListFriend.setLayoutManager(linearLayoutManager);
         adapter = new ListPeopleAdapter(this, listFriend, btnAddGroup, listIDChoose, listIDRemove, isEditGroup, groupEdit);
         recyclerListFriend.setAdapter(adapter);
-
-
     }
 
     private void editGroup() {
@@ -145,6 +143,7 @@ public class AddGroupActivity extends AppCompatActivity {
         }
         room.groupInfo.put("name", editTextGroupName.getText().toString());
         room.groupInfo.put("admin", StaticConfig.UID);
+        room.groupInfo.put("groupIcon", StaticConfig.STR_DEFAULT_BASE64);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -194,6 +193,7 @@ public class AddGroupActivity extends AppCompatActivity {
         }
         room.groupInfo.put("name", editTextGroupName.getText().toString());
         room.groupInfo.put("admin", StaticConfig.UID);
+        room.groupInfo.put("groupIcon", StaticConfig.STR_DEFAULT_BASE64);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

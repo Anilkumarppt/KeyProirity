@@ -5,6 +5,7 @@
     <string name="login_success">login success</string>
     <string name="login">LOGIN</string>
     <string name="Username">Email</string>
+    <string name="ProfileName">ProfileName</string>
     <string name="Password">Password</string>
     <string name="forgot_your_password">Forgot your password ?</string>
     <string name="go">GO</string>
