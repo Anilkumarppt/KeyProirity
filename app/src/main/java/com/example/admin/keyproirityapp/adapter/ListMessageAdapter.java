@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.admin.keyproirityapp.BasicTest;
 import com.example.admin.keyproirityapp.LastSeenStatus;
 import com.example.admin.keyproirityapp.R;
@@ -62,18 +64,17 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        boolean multimedia = consersation.getListMessageData().get(position).getMultimedia();
         String contentType = consersation.getListMessageData().get(position).getContentType();
         final long time = consersation.getListMessageData().get(position).getTimestamp();
         LastSeenStatus getTime = new LastSeenStatus();
         long last_seen = time;
         String lastSeendisplay = getTime.getTimeAgo(last_seen, context).toString();
-        Log.d("time ", String.valueOf(time));
         Log.d("messages Debug", consersation.getListMessageData().get(position).getText());
+        Log.d("positions", String.valueOf(this.getItemId(position) - 1));
         if (contentType.equals("text")) {
             if (holder instanceof ItemMessageFriendHolder) {
                 String msg = consersation.getListMessageData().get(position).text;
-                ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
+                //  ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
                 ((ItemMessageFriendHolder) holder).txtContent.setText(msg);
                 Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
                 if (currentAvata != null) {
@@ -105,8 +106,9 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                 }
             } else if (holder instanceof ItemMessageUserHolder) {
+                Log.v("msg", consersation.getListMessageData().get(position).text);
                 ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
-                ((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
+                //((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
 
                 if (bitmapAvataUser != null) {
                     ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
@@ -121,47 +123,23 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             if (holder instanceof ItemMessageFriendHolder) {
                 ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.INVISIBLE);
                 ((ItemMessageFriendHolder) holder).txtContent.setPadding(0, 0, 0, 0);
+                //    ((ItemMessageFriendHolder) holder).txtTimeFriend.setGravity(Gravity.CENTER);
+                // ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
 
                 ((ItemMessageFriendHolder) holder).imageMessageFrnd.setVisibility(VISIBLE);
                 Picasso.with(context).load(msg).into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
-/*
-                Picasso.with(context).load(msg).networkPolicy(NetworkPolicy.OFFLINE).placeholder(R.drawable.default_avatar)
-                        .into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
-*/
-
-/*
-                Picasso.with(context).load(msg).networkPolicy(NetworkPolicy.OFFLINE).placeholder(R.drawable.default_avata)
-                        .into(((ItemMessageFriendHolder) holder).imageMessageFrnd, new Callback() {
-                            @Override
-                            public void onSuccess() {
-
-                            }
-
-                            @Override
-                            public void onError() {
-                                Picasso.with(context).load(msg).placeholder(R.drawable.default_avatar)
-                                        .into(((ItemMessageFriendHolder) holder).imageMessageFrnd, new Callback() {
-                                            @Override
-                                            public void onSuccess() {
-
-                                            }
-
-                                            @Override
-                                            public void onError() {
-                                                Log.d("Image Error", "Image");
-                                            }
-                                        });
-
-                            }
-                        });
-*/
 
                 ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.INVISIBLE);
                 ((ItemMessageFriendHolder) holder).txtContent.setPadding(0, 0, 0, 0);
                 ((ItemMessageFriendHolder) holder).imageMessageFrnd.setVisibility(View.VISIBLE);
-                ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
-
-                ((ItemMessageFriendHolder) holder).imageMessageFrnd.setImageResource(R.drawable.default_avata);
+                //((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
+                Glide.with(context)
+                        .load(msg)
+                        .thumbnail(0.1f)
+                        .crossFade()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
+                // ((ItemMessageFriendHolder) holder).imageMessageFrnd.setImageResource(R.drawable.default_avata);
 
                 Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
                 if (currentAvata != null) {
@@ -193,7 +171,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                 }
             } else if (holder instanceof ItemMessageUserHolder) {
-                ((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
+                //((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
 
                     /*
                 ((ItemMessageUserHolder) holder).txtContent.setVisibility(View.INVISIBLE);
@@ -206,11 +184,19 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 ((ItemMessageUserHolder) holder).imageMessage.setVisibility(VISIBLE);
                 //  ((ItemMessageUserHolder) holder).imageMessage.setImageResource(R.drawable.testimage);
 
-                Picasso.with(((ItemMessageUserHolder) holder).imageMessage.getContext()).load(consersation.getListMessageData().get(position).text)
+
+                Glide.with(context)
+                        .load(msg)
+                        .thumbnail(0.1f)
+                        .crossFade()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(((ItemMessageUserHolder) holder).imageMessage);
+
+               /* Picasso.with(((ItemMessageUserHolder) holder).imageMessage.getContext()).load(consersation.getListMessageData().get(position).text)
                         .into(((ItemMessageUserHolder) holder).imageMessage);
                 if (bitmapAvataUser != null) {
                     ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
-                }
+                }*/
             }
 
         }
@@ -228,15 +214,22 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return consersation.getListMessageData().size();
     }
 
-    public void add(Message message) {
-        consersation.getListMessageData().add(message);
-        notifyItemInserted(consersation.getListMessageData().size() - 1);
+    public void addAll(List<Message> newUsers) {
+        int initialSize = consersation.getListMessageData().size();
+        for (Message message : newUsers) {
+            consersation.getListMessageData().add(message);
+        }
+
+        notifyItemRangeInserted(initialSize, newUsers.size());
     }
 
-    public void addAll(Consersation consersation) {
-        for (Message message : consersation.getListMessageData()) {
-            add(message);
-        }
+    public String getLastItemId() {
+        String idRoom, senderId, reciverId;
+        // senderId=consersation.getListMessageData().get()
+        int size = consersation.getListMessageData().size();
+        return String.valueOf(size - 1);
+        //idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
+
     }
 
 }

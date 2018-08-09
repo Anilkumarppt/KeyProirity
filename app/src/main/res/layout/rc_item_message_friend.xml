@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -28,6 +29,8 @@
             android:layout_centerHorizontal="true"
             android:fitsSystemWindows="true"
             android:scaleType="centerCrop"
+            android:layout_toStartOf="@+id/imageView3"
+            app:srcCompat="@drawable/testimage"
             android:visibility="gone" />
 
         <TextView
@@ -52,12 +55,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/textContentFriend"
-            android:layout_marginBottom="2dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/rounded_corner2"
             android:gravity="right|center"
             android:paddingBottom="1dp"
             android:paddingRight="5dp"
             android:text="fgfdg"
+            android:textStyle="bold"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="#9E9E9E"
             android:textSize="12sp" />

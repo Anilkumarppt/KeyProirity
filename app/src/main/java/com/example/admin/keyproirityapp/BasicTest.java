@@ -31,6 +31,7 @@ import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Consersation;
 import com.example.admin.keyproirityapp.model.Message;
 import com.example.admin.keyproirityapp.model.User;
+import com.example.admin.keyproirityapp.util.EndlessRecyclerOnScrollListener;
 import com.example.admin.keyproirityapp.util.ImageUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -47,6 +48,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,32 +64,36 @@ public class BasicTest extends AppCompatActivity {
     public CircleImageView groupIcon;
     public CircleImageView profilepic;
     TextView usernametitle;
-
+    List<String > idlist=new ArrayList<>();
+    int visibleItemCount;
+    int currentPage=0;
     TextView userLastseen;
     DatabaseReference groupDB;
     String frindid, chat_Type, nameFriend;
     String toolbartype;
     String groupId;
     String baseAvata;
-    private boolean isLoading = false;
-    private boolean isLastPage = false;
-    private int TOTAL_PAGES = 10;
-    private int currentPage = 1;
+    private int mTotalItemCount = 0;
+    private int mLastVisibleItemPosition;
+    private boolean mIsLoading = false;
+    private int mPostsPerPage = 10;
 
     private ProgressBar progressBar;
     private ProgressDialog progressDialog;
     private DatabaseReference messageDatabaseRef;
     private RecyclerView recyclerChat;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private ListMessageAdapter adapter;
     private String roomId;
     private ArrayList<CharSequence> idFriend;
     private Consersation consersation;
     private EditText editWriteMessage;
+    SwipeRefreshLayout refreshLayout;
     private LinearLayoutManager linearLayoutManager;
     private int PICK_IMAGE = 1;
     private StorageReference mStorage;
     private DatabaseReference rootRef;
+
+    private static  int start=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,100 +139,54 @@ public class BasicTest extends AppCompatActivity {
             linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
 
-            //swipeRefreshLayout = findViewById(R.id.messageswipe);
-            //  swipeRefreshLayout.setOnRefreshListener(this);
-
+           refreshLayout=findViewById(R.id.swipeRefreshLayoutchat);
+           //refreshLayout.setOnRefreshListener((SwipeRefreshLayout.OnRefreshListener)BasicTest.this);
             recyclerChat.setLayoutManager(linearLayoutManager);
             adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
             recyclerChat.setAdapter(adapter);
-/*
-           recyclerChat.addOnScrollListener(new PaginationScrollListener(linearLayoutManager) {
-
-
-               @Override
-               protected void loadMoreItems() {
-                   isLoading=true;
-                   currentPage +=1;
-                   new Handler().postDelayed(new Runnable() {
-                       @Override
-                       public void run() {
-                           loadNextPage();
-                       }
-                   }, 1000);
-
-               }
-
-               @Override
-               public int getTotalPageCount() {
-                   return TOTAL_PAGES;
-               }
-
-               @Override
-               public boolean isLastPage() {
-                   return isLastPage;
-               }
-
-               @Override
-               public boolean isLoading() {
-                   return isLoading;
-               }
-           });
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    loadFirstPage();
-                }
-            }, 1000);
-*/
-
-            loadMessages();
+            loadData();
         }
     }
 
-    private void loadNextPage() {
+    private void loadData() {
         Query query;
-        query = messageDatabaseRef.orderByKey().limitToFirst(currentPage * TOTAL_PAGES);
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Message message;
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    message = dsp.getValue(Message.class);
-                    consersation.getListMessageData().add(message);
-                }
-                adapter.addAll(consersation);
-            }
+        query=messageDatabaseRef.limitToFirst(TOTAL_ITEMS)
+                .startAt(start).orderByChild("timestamp");
+                query.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(!dataSnapshot.hasChildren()){
+                            currentPage--;
+                        }
+                        for(DataSnapshot dsp:dataSnapshot.getChildren()){
+                            Message message=dsp.getValue(Message.class);
+                            consersation.getListMessageData().add(message);
+                            adapter.notifyDataSetChanged();
+                        }
+                        start+=(TOTAL_ITEMS+1);
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                    }
+                });
+    }
+    private void loadMoreData(){
+        currentPage++;
+        Toast.makeText(this, "Page No"+String.valueOf(currentPage), Toast.LENGTH_SHORT).show();
+        loadData();
+    }
+    private String getLastId(){
+        String lastId=null;
+        int size=idlist.size();
+        lastId=idlist.get(size-1);
+
+        Log.d("last Id",lastId);
+        return lastId;
 
     }
-
-    private void loadFirstPage() {
-        Query query;
-        query = messageDatabaseRef.orderByKey().limitToFirst(10);
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Message message;
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    message = dsp.getValue(Message.class);
-                    consersation.getListMessageData().add(message);
-                }
-                adapter.addAll(consersation);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    /*private void getMessages(String nodeId) {
+    private void getMessages(String nodeId) {
         Query query;
         if (nodeId == null) {
             query = messageDatabaseRef.orderByKey().
@@ -239,27 +199,32 @@ public class BasicTest extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Message message;
+                List<Message> messagesList=new ArrayList<>();
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     message = dsp.getValue(Message.class);
+                    idlist.add(dsp.getKey());
                     consersation.getListMessageData().add(message);
+                    messagesList.add(dsp.getValue(Message.class));
                 }
 
-                adapter.addAll(consersation);
+                linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
                 mIsLoading = false;
+                adapter.addAll(messagesList);
 
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+            mIsLoading=false;
             }
         });
+        //adapter.notifyDataSetChanged();
     }
-*/
+
     private void loadMessages() {
         DatabaseReference reference = messageDatabaseRef;
         Query messagequery = reference.limitToLast(TOTAL_ITEMS).orderByKey();
-        messagequery.addChildEventListener(new ChildEventListener() {
+        reference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getValue() != null) {
@@ -436,6 +401,7 @@ public class BasicTest extends AppCompatActivity {
         if (content.length() > 0) {
             editWriteMessage.setText("");
             Message newMessage = new Message(StaticConfig.UID, roomId, content, System.currentTimeMillis(), "text");
+            Log.d("room id",roomId);
             messageDatabaseRef.keepSynced(true);
             messageDatabaseRef.push().setValue(newMessage);
         }
@@ -531,13 +497,7 @@ public class BasicTest extends AppCompatActivity {
         startActivity(groupInfo);
     }
 
-    /*@Override
-    public void onRefresh() {
-        currentPage++;
-        consersation.getListMessageData().clear();
-        loadMessages();
-        adapter.notifyDataSetChanged();
-    }*/
+
 }
 
 
