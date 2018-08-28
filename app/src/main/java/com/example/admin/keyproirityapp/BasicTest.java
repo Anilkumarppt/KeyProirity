@@ -3,6 +3,7 @@ package com.example.admin.keyproirityapp;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,9 +32,9 @@ import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Consersation;
 import com.example.admin.keyproirityapp.model.Message;
 import com.example.admin.keyproirityapp.model.User;
-import com.example.admin.keyproirityapp.util.EndlessRecyclerOnScrollListener;
 import com.example.admin.keyproirityapp.util.ImageUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -50,7 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -58,26 +58,26 @@ public class BasicTest extends AppCompatActivity {
     public static final int VIEW_TYPE_USER_MESSAGE = 0;
     public static final int VIEW_TYPE_FRIEND_MESSAGE = 1;
     private static final int TOTAL_ITEMS = 10;
-    public static HashMap<String, Bitmap> bitmapAvataFriend;
-    public Bitmap bitmapAvataUser;
     private static final int PAGE_START = 0;
+    public static HashMap<String, Bitmap> bitmapAvataFriend;
+    private static int start = 0;
+    public Bitmap bitmapAvataUser;
     public CircleImageView groupIcon;
     public CircleImageView profilepic;
     TextView usernametitle;
     List<String > idlist=new ArrayList<>();
-    int visibleItemCount;
-    int currentPage=0;
     TextView userLastseen;
     DatabaseReference groupDB;
     String frindid, chat_Type, nameFriend;
     String toolbartype;
     String groupId;
     String baseAvata;
+    DatabaseReference notificationReference;
+    SwipeRefreshLayout refreshLayout;
     private int mTotalItemCount = 0;
     private int mLastVisibleItemPosition;
     private boolean mIsLoading = false;
     private int mPostsPerPage = 10;
-
     private ProgressBar progressBar;
     private ProgressDialog progressDialog;
     private DatabaseReference messageDatabaseRef;
@@ -87,13 +87,10 @@ public class BasicTest extends AppCompatActivity {
     private ArrayList<CharSequence> idFriend;
     private Consersation consersation;
     private EditText editWriteMessage;
-    SwipeRefreshLayout refreshLayout;
     private LinearLayoutManager linearLayoutManager;
     private int PICK_IMAGE = 1;
     private StorageReference mStorage;
     private DatabaseReference rootRef;
-
-    private static  int start=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,21 +98,20 @@ public class BasicTest extends AppCompatActivity {
         setContentView(R.layout.activity_basic_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        //onNewIntent(getIntent());
         Intent intentData = getIntent();
         chat_Type = intentData.getStringExtra(StaticConfig.PERSONAL_CHAT);
+        frindid = intentData.getStringExtra("from_senderId");
         idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
+        //roomId=frindid.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + frindid).hashCode() + "" : "" + (frindid + StaticConfig.UID).hashCode();
+
         roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
         nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
-        frindid = intentData.getStringExtra("FriendId");
         groupId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
         groupDB = FirebaseDatabase.getInstance().getReference().child("group" + "/" + groupId);
-
         progressDialog = new ProgressDialog(this);
-
         messageDatabaseRef = FirebaseDatabase.getInstance().getReference().child("message" + "/" + roomId);
         messageDatabaseRef.keepSynced(true);
-
         consersation = new Consersation();
         String base64AvataUser = SharedPreferenceHelper.getInstance(this).getUserInfo().avata;
         if (!base64AvataUser.equals(StaticConfig.STR_DEFAULT_BASE64)) {
@@ -136,47 +132,34 @@ public class BasicTest extends AppCompatActivity {
                 actionbarType(toolbar);
                 showLastSeen(idFriend, nameFriend);
             }
-            linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-            recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
-
-           refreshLayout=findViewById(R.id.swipeRefreshLayoutchat);
-           //refreshLayout.setOnRefreshListener((SwipeRefreshLayout.OnRefreshListener)BasicTest.this);
-            recyclerChat.setLayoutManager(linearLayoutManager);
-            adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
-            recyclerChat.setAdapter(adapter);
-            loadData();
+            initRecyclerview();
         }
     }
 
-    private void loadData() {
-        Query query;
-        query=messageDatabaseRef.limitToFirst(TOTAL_ITEMS)
-                .startAt(start).orderByChild("timestamp");
-                query.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(!dataSnapshot.hasChildren()){
-                            currentPage--;
-                        }
-                        for(DataSnapshot dsp:dataSnapshot.getChildren()){
-                            Message message=dsp.getValue(Message.class);
-                            consersation.getListMessageData().add(message);
-                            adapter.notifyDataSetChanged();
-                        }
-                        start+=(TOTAL_ITEMS+1);
-                    }
+    private void initRecyclerview() {
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerChat = (RecyclerView) findViewById(R.id.message_list_users);
+        //refreshLayout.setOnRefreshListener((SwipeRefreshLayout.OnRefreshListener)BasicTest.this);
+        recyclerChat.setLayoutManager(linearLayoutManager);
+        adapter = new ListMessageAdapter(this, consersation, bitmapAvataFriend, bitmapAvataUser);
+        recyclerChat.setAdapter(adapter);
+        loadMessages();
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+    }
 
-                    }
-                });
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        frindid = intent.getStringExtra("from_senderId");
+        Toast.makeText(this, frindid, Toast.LENGTH_SHORT).show();
+        roomId = frindid.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + frindid).hashCode() + "" : "" + (frindid + StaticConfig.UID).hashCode();
+        messageDatabaseRef = FirebaseDatabase.getInstance().getReference().child("message" + "/" + roomId);
+        messageDatabaseRef.keepSynced(true);
+        initRecyclerview();
+
     }
-    private void loadMoreData(){
-        currentPage++;
-        Toast.makeText(this, "Page No"+String.valueOf(currentPage), Toast.LENGTH_SHORT).show();
-        loadData();
-    }
+
     private String getLastId(){
         String lastId=null;
         int size=idlist.size();
@@ -185,40 +168,6 @@ public class BasicTest extends AppCompatActivity {
         Log.d("last Id",lastId);
         return lastId;
 
-    }
-    private void getMessages(String nodeId) {
-        Query query;
-        if (nodeId == null) {
-            query = messageDatabaseRef.orderByKey().
-                    limitToFirst(mPostsPerPage);
-        } else
-            query = messageDatabaseRef.orderByKey().
-                    startAt(nodeId).
-                    limitToFirst(mPostsPerPage);
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Message message;
-                List<Message> messagesList=new ArrayList<>();
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    message = dsp.getValue(Message.class);
-                    idlist.add(dsp.getKey());
-                    consersation.getListMessageData().add(message);
-                    messagesList.add(dsp.getValue(Message.class));
-                }
-
-                linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
-                mIsLoading = false;
-                adapter.addAll(messagesList);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            mIsLoading=false;
-            }
-        });
-        //adapter.notifyDataSetChanged();
     }
 
     private void loadMessages() {
@@ -238,11 +187,7 @@ public class BasicTest extends AppCompatActivity {
                     consersation.getListMessageData().add(newMessage);
                     adapter.notifyDataSetChanged();
                     linearLayoutManager.scrollToPosition(consersation.getListMessageData().size() - 1);
-
-                    //
-                    // swipeRefreshLayout.setRefreshing(false);
                     Log.d("adapter size", String.valueOf(consersation.getListMessageData().size()));
-
                 }
 
             }
@@ -280,7 +225,6 @@ public class BasicTest extends AppCompatActivity {
         actionBar.setCustomView(actionbar_view);
         TextView groupName = findViewById(R.id.display_groupname);
         groupIcon = findViewById(R.id.display_groupicon);
-
         groupName.setText(nameFriend);
         ///setgorupImage();
     }
@@ -398,11 +342,23 @@ public class BasicTest extends AppCompatActivity {
 
     public void sendMessage(View view) {
         String content = editWriteMessage.getText().toString().trim();
+
         if (content.length() > 0) {
+            notificationReference = FirebaseDatabase.getInstance().getReference("Notifications").child(frindid).push();
+            Map<String, Object> notificationMessage = new HashMap<>();
+            notificationMessage.put("message", content);
+            notificationMessage.put("from", StaticConfig.UID);
+            notificationMessage.put("roomId", roomId);
+            notificationReference.setValue(notificationMessage).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(BasicTest.this, "NotificationSent", Toast.LENGTH_SHORT).show();
+                }
+            });
             editWriteMessage.setText("");
             Message newMessage = new Message(StaticConfig.UID, roomId, content, System.currentTimeMillis(), "text");
+
             Log.d("room id",roomId);
-            messageDatabaseRef.keepSynced(true);
             messageDatabaseRef.push().setValue(newMessage);
         }
     }
@@ -426,8 +382,6 @@ public class BasicTest extends AppCompatActivity {
             progressDialog.show();
             Uri uri = data.getData();
             final String imageLocation = "Photos" + "/" + roomId;
-            final String imageLocationId = imageLocation + "/" + uri.getLastPathSegment();
-            final String uniqueId = UUID.randomUUID().toString();
             DatabaseReference userMessage_key = messageDatabaseRef.push();
             String message_pushId = userMessage_key.getKey();
             final StorageReference filePathMessage = mStorage.child("MessageImages").child(message_pushId + ".jpg");
@@ -443,7 +397,6 @@ public class BasicTest extends AppCompatActivity {
                         Map messageBodyDetails = new HashMap();
                         DatabaseReference userMessage_key = messageDatabaseRef.push();
                         String message_pushId = userMessage_key.getKey();
-
                         messageBodyDetails.put(message_pushId, imageMessage);
                         FirebaseDatabase.getInstance().getReference().child("message" + "/" + roomId).updateChildren(messageBodyDetails, new DatabaseReference.CompletionListener() {
                             @Override

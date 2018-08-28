@@ -46,18 +46,17 @@ import java.util.Iterator;
 
 
 public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    private RecyclerView recyclerListGroups;
-    public FragGroupClickFloatButton onClickFloatButton;
-    private ArrayList<Group> listGroup;
-    private ListGroupsAdapter adapter;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
     public static final int CONTEXT_MENU_DELETE = 1;
     public static final int CONTEXT_MENU_EDIT = 2;
     public static final int CONTEXT_MENU_LEAVE = 3;
     public static final int REQUEST_EDIT_GROUP = 0;
     public static final String CONTEXT_MENU_KEY_INTENT_DATA_POS = "pos";
-
+    public FragGroupClickFloatButton onClickFloatButton;
     LovelyProgressDialog progressDialog, waitingLeavingGroup;
+    private RecyclerView recyclerListGroups;
+    private ArrayList<Group> listGroup;
+    private ListGroupsAdapter adapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public GroupFragment() {
         // Required empty public constructor
@@ -367,8 +366,8 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
 class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private ArrayList<Group> listGroup;
     public static ListFriend listFriend = null;
+    private ArrayList<Group> listGroup;
     private Context context;
 
     public ListGroupsAdapter(Context context, ArrayList<Group> listGroup) {
@@ -402,6 +401,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (listFriend == null) {
                     listFriend = FriendDB.getInstance(context).getListFriend();
                 }
+                //Intent intent = new Intent(context, BasicTest.class);
                 Intent intent = new Intent(context, BasicTest.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
                 ArrayList<CharSequence> idFriend = new ArrayList<>();
@@ -422,6 +422,27 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, listGroup.get(position).id);
                 intent.putExtra(StaticConfig.PERSONAL_CHAT, "group");
                 context.startActivity(intent);
+
+               /* Intent intent=new Intent(context,GroupChatActivity.class);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
+                ArrayList<CharSequence> idFriend = new ArrayList<>();
+                GroupChatActivity.bitmapAvataFriend = new HashMap<>();
+                for (String id : listGroup.get(position).member) {
+                    idFriend.add(id);
+                    String avata = listFriend.getAvataById(id);
+                    if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                        byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
+                        GroupChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                    } else if (avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                        GroupChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
+                    } else {
+                        GroupChatActivity.bitmapAvataFriend.put(id, null);
+                    }
+                }
+                intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
+                intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, listGroup.get(position).id);
+                intent.putExtra(StaticConfig.PERSONAL_CHAT, "group");
+                context.startActivity(intent);*/
             }
         });
     }

@@ -12,6 +12,12 @@
     <string name="repeat_password">Repeat Password</string>
     <string name="next">NEXT</string>
     <string name="register">REGISTER</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <!--
+        This is the name that users will see when interacting with this channel.
+        It should describe the category of notifications that will be sent through this channel
+     -->
+    <string name="default_notification_channel_name" translatable="true">Personal</string>
 
     <string name="hint_username">Enter a new username</string>
     <string name="hint_email_reset">Enter your email</string>
@@ -20,4 +26,10 @@
     <string name="title_activity_basic">BasicActivity</string>
     <string name="title_activity_group_info">GroupInfo</string>
     <string name="content_discription">Name of the group</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_group_chat">GroupChatActivity</string>
+    <string name="hint_message">Type your message..</string>
+    <string name="placeholder">placeholder</string>
 </resources>

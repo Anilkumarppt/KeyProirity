@@ -13,35 +13,35 @@
         android:layout_height="wrap_content"
         android:gravity="center">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imageView2"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="5dp"
-        android:src="@drawable/default_avata" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="5dp"
+            android:src="@drawable/default_avata" />
 
         <ImageView
             android:id="@+id/imageMessageUser"
             android:layout_width="300dp"
             android:layout_height="300dp"
             android:layout_alignLeft="@+id/imageView2"
-            android:layout_alignParentTop="true"
-            android:fitsSystemWindows="true"
-            android:scaleType="centerCrop"
             android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_alignStart="@+id/imageView2"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="2dp"
+            android:fitsSystemWindows="true"
+            android:scaleType="centerCrop"
             android:visibility="gone"
             app:srcCompat="@drawable/testimage" />
 
         <TextView
-        android:id="@+id/textContentUser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+            android:id="@+id/textContentUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/imageView2"
             android:layout_alignStart="@+id/imageView2"
             android:layout_marginLeft="30dp"

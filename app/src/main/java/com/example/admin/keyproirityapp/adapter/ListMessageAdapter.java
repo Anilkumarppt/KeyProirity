@@ -3,9 +3,12 @@ package com.example.admin.keyproirityapp.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +16,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.admin.keyproirityapp.BasicTest;
 import com.example.admin.keyproirityapp.LastSeenStatus;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Consersation;
 import com.example.admin.keyproirityapp.model.Message;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -68,14 +75,12 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         final long time = consersation.getListMessageData().get(position).getTimestamp();
         LastSeenStatus getTime = new LastSeenStatus();
         long last_seen = time;
-        String lastSeendisplay = getTime.getTimeAgo(last_seen, context).toString();
-        Log.d("messages Debug", consersation.getListMessageData().get(position).getText());
-        Log.d("positions", String.valueOf(this.getItemId(position) - 1));
+        //String lastSeendisplay = getTime.getTimeAgo(last_seen, context).toString();
         if (contentType.equals("text")) {
             if (holder instanceof ItemMessageFriendHolder) {
                 String msg = consersation.getListMessageData().get(position).text;
                 //  ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
-                ((ItemMessageFriendHolder) holder).txtContent.setText(msg);
+                ((ItemMessageFriendHolder) holder).txtContent.setText(msg + "," + position);
                 Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
                 if (currentAvata != null) {
                     ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
@@ -107,7 +112,7 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             } else if (holder instanceof ItemMessageUserHolder) {
                 Log.v("msg", consersation.getListMessageData().get(position).text);
-                ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
+                ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text + "," + position);
                 //((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
 
                 if (bitmapAvataUser != null) {
@@ -116,30 +121,46 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
 
         } else {
-            Log.d("Image Message", "Image");
+            /*image message*/
             final String msg = consersation.getListMessageData().get(position).text;
             final long timeImage = consersation.getListMessageData().get(position).getTimestamp();
-            Log.d("time ", String.valueOf(timeImage));
             if (holder instanceof ItemMessageFriendHolder) {
                 ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.INVISIBLE);
                 ((ItemMessageFriendHolder) holder).txtContent.setPadding(0, 0, 0, 0);
-                //    ((ItemMessageFriendHolder) holder).txtTimeFriend.setGravity(Gravity.CENTER);
-                // ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
-
+                /*    ((ItemMessageFriendHolder) holder).txtTimeFriend.setGravity(Gravity.CENTER);
+                 ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
+*/
                 ((ItemMessageFriendHolder) holder).imageMessageFrnd.setVisibility(VISIBLE);
-                Picasso.with(context).load(msg).into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
-
                 ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.INVISIBLE);
                 ((ItemMessageFriendHolder) holder).txtContent.setPadding(0, 0, 0, 0);
                 ((ItemMessageFriendHolder) holder).imageMessageFrnd.setVisibility(View.VISIBLE);
-                //((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
+  /*              ((ItemMessageFriendHolder) holder).txtTimeFriend.setText(lastSeendisplay);
+  */
+
+                /*DrawableRequestBuilder<String> thumbnailRequest = Glide
+                        .with( context )
+                        .load( msg );
+
                 Glide.with(context)
                         .load(msg)
-                        .thumbnail(0.1f)
+                        .thumbnail(thumbnailRequest)
                         .crossFade()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
-                // ((ItemMessageFriendHolder) holder).imageMessageFrnd.setImageResource(R.drawable.default_avata);
+                */// ((ItemMessageFriendHolder) holder).imageMessageFrnd.setImageResource(R.drawable.default_avat
+                StorageReference reference = FirebaseStorage.getInstance()
+                        .getReference().child(msg);
+                reference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Glide.with(context).
+                                    load(msg)
+                                    .into(((ItemMessageFriendHolder) holder).imageMessageFrnd);
+
+                        }
+                    }
+                });
 
                 Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
                 if (currentAvata != null) {
@@ -171,27 +192,25 @@ public class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                 }
             } else if (holder instanceof ItemMessageUserHolder) {
-                //((ItemMessageUserHolder) holder).txtTimeuser.setText(lastSeendisplay);
-
-                    /*
-                ((ItemMessageUserHolder) holder).txtContent.setVisibility(View.INVISIBLE);
-                    ((ItemMessageUserHolder) holder).txtContent.setPadding(0,0,0,0);
-                ((ItemMessageUserHolder) holder).imageMessage.setVisibility(View.VISIBLE);
-*/
                 ((ItemMessageUserHolder) holder).txtContent.setVisibility(View.INVISIBLE);
                 ((ItemMessageUserHolder) holder).txtContent.setPadding(0, 0, 0, 0);
-
                 ((ItemMessageUserHolder) holder).imageMessage.setVisibility(VISIBLE);
-                //  ((ItemMessageUserHolder) holder).imageMessage.setImageResource(R.drawable.testimage);
-
+                StorageReference reference = FirebaseStorage.getInstance()
+                        .getReference().child(msg);
+                Glide.with(context).
+                        load(msg)
+                        .into(((ItemMessageUserHolder) holder).imageMessage);
+ /* DrawableRequestBuilder<String> thumbnailRequest = Glide
+                        .with( context )
+                        .load( msg );
 
                 Glide.with(context)
                         .load(msg)
-                        .thumbnail(0.1f)
+                        .thumbnail(thumbnailRequest)
                         .crossFade()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(((ItemMessageUserHolder) holder).imageMessage);
-
+*/
                /* Picasso.with(((ItemMessageUserHolder) holder).imageMessage.getContext()).load(consersation.getListMessageData().get(position).text)
                         .into(((ItemMessageUserHolder) holder).imageMessage);
                 if (bitmapAvataUser != null) {

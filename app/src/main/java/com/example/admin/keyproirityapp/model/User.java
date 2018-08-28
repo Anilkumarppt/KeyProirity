@@ -7,6 +7,7 @@ public class User {
     public String avata;
     public String mobile;
     public Status status;
+    public String deviceToken;
     public Message message;
 
 

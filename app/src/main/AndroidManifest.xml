@@ -21,6 +21,17 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <service android:name=".service.MessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name="service.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
         <activity
             android:name=".ui.WelcomeScreen"
             android:launchMode="singleTop"
@@ -35,12 +46,19 @@
         <activity
             android:name=".BasicTest"
             android:label="Basic"
-            android:theme="@style/ChatTheme"></activity>
+            android:launchMode="singleTop"
+            android:theme="@style/ChatTheme">
+            <intent-filter>
+                <action android:name="com.example.admin.keyproirityapp_TARGET_NOTIFICATION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.LoginActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Translucent" />
+            android:theme="@style/AppFullScreentheme" />
         <activity
             android:name=".ui.RegisterActivity"
             android:launchMode="singleTop"
@@ -63,7 +81,29 @@
             android:name=".GroupInfo"
             android:label="@string/title_activity_group_info"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/ChatTheme"></activity>
+            android:theme="@style/ChatTheme" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/default_avata" />
+        <!--
+             Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+
+        <activity
+            android:name=".NotificationActivity"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".ui.GroupChatActivity"
+            android:label="@string/title_activity_group_chat" />
+        <activity android:name=".widgets.TestActivity"></activity>
     </application>
 
 </manifest>

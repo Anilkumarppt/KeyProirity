@@ -18,14 +18,17 @@ import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -35,16 +38,15 @@ import java.util.regex.Pattern;
 public class LoginActivity extends Activity {
     private final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-
+    String mEmail, mPassword;
+    FirebaseUser currentUser;
+    EditText editText_userMail, editText_userPassword;
+    DatabaseReference userReference;
     //Firebase variables declaration
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser user;
-
     private boolean firstTimeAccess;
-    String mEmail, mPassword;
-    FirebaseUser currentUser;
-    EditText editText_userMail, editText_userPassword;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class LoginActivity extends Activity {
 
     private void initFirebase() {
         mAuth = FirebaseAuth.getInstance();
+        userReference = FirebaseDatabase.getInstance().getReference("user");
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -95,11 +98,19 @@ public class LoginActivity extends Activity {
                 if (!task.isSuccessful()) {
                     Toast.makeText(LoginActivity.this, "signIn Problem", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginActivity.this, "SignIn Sucess", Toast.LENGTH_SHORT).show();
-                    currentUser = mAuth.getCurrentUser();
-                    ;
-                    saveUserInfo();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    String onlineUser_id = mAuth.getCurrentUser().getUid();
+                    String device_token = FirebaseInstanceId.getInstance().getToken();
+                    userReference.child(onlineUser_id).child("deviceToken").setValue(device_token).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(LoginActivity.this, "SignIn Sucess", Toast.LENGTH_SHORT).show();
+                            currentUser = mAuth.getCurrentUser();
+                            saveUserInfo();
+                            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(mainIntent);
+                        }
+                    });
 
                 }
 

@@ -22,16 +22,17 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class RegisterActivity extends AppCompatActivity {
-    private final Pattern VALID_EMAIL_ADDRESS_REGEX =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     private static final String TAG = "SignUpActivity";
     public static String STR_EXTRA_ACTION_REGISTER = "register";
+    private final Pattern VALID_EMAIL_ADDRESS_REGEX =
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     FirebaseAuth mAuth;
     EditText mUsername, mUseremail, mUserMobile, mUserPassword, mUserAge;
     CheckBox mTermsandCondition;
@@ -110,6 +111,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void saveUserInfo(String username, String email, String password, String mobile, String age) {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
+        String onlineUser_id = mAuth.getCurrentUser().getUid();
+        String device_token = FirebaseInstanceId.getInstance().getToken();
         mDatabase = mFirebaseDatabase.getReference("user");
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String id = currentUser.getUid();
@@ -118,6 +121,7 @@ public class RegisterActivity extends AppCompatActivity {
         newUser.name = username;
         newUser.avata = StaticConfig.STR_DEFAULT_BASE64;
         newUser.mobile = mobile;
+        newUser.deviceToken = device_token;
         /// /   UserInfo userInfo=new UserInfo(username,email,password,mobile,age,"deafult_image","Hey I am Using ChatApp");
         mDatabase.child(id).setValue(newUser).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

@@ -59,19 +59,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
+    public static final String ACTION_DELETE_FRIEND = "com.android.rivchat.DELETE_FRIEND";
+    public static int ACTION_START_CHAT = 1;
+    public FragFriendClickFloatButton onClickFloatButton;
+    public Dialog dialog;
     private RecyclerView recyclerListFrends;
     private ListFriendsAdapter adapter;
-    public FragFriendClickFloatButton onClickFloatButton;
     private ListFriend dataListFriend = null;
     private ArrayList<String> listFriendID = null;
     private LovelyProgressDialog dialogFindAllFriend;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CountDownTimer detectFriendOnline;
-    public static int ACTION_START_CHAT = 1;
-
-    public Dialog dialog;
-    public static final String ACTION_DELETE_FRIEND = "com.android.rivchat.DELETE_FRIEND";
-
     private BroadcastReceiver deleteFriendReceiver;
 
     public FriendsFragment() {
@@ -192,7 +190,6 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         user.name = (String) mapUserInfo.get("name");
                         user.email = (String) mapUserInfo.get("email");
                         user.avata = (String) mapUserInfo.get("avata");
-
                         user.id = id;
                         user.idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
                         dataListFriend.getListFriend().add(user);
@@ -393,16 +390,16 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
 class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private ListFriend listFriend;
-    private Context context;
     public static Map<String, Query> mapQuery;
     public static Map<String, DatabaseReference> mapQueryOnline;
     public static Map<String, ChildEventListener> mapChildListener;
     public static Map<String, ChildEventListener> mapChildListenerOnline;
     public static Map<String, Boolean> mapMark;
-    private FriendsFragment fragment;
     LovelyProgressDialog dialogWaitDeleting;
     Dialog dialog;
+    private ListFriend listFriend;
+    private Context context;
+    private FriendsFragment fragment;
 
     public ListFriendsAdapter(Context context, ListFriend listFriend, FriendsFragment fragment) {
         this.listFriend = listFriend;
@@ -442,7 +439,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
                         ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
                         idFriend.add(id);
-                        intent.putExtra("FriendId", id);
+                        intent.putExtra("from_senderId", id);
                         intent.putExtra(StaticConfig.PERSONAL_CHAT, "onetoone");
                         intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
@@ -500,7 +497,6 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ItemFriendViewHolder) holder).txtMessage.setText("Image");
                     ((ItemFriendViewHolder) holder).txtMessage.setTypeface(Typeface.DEFAULT);
                     // ((ItemFriendViewHolder) holder).txtMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_camera_alt_black_24dp,0,0,0);
-
                     ((ItemFriendViewHolder) holder).txtName.setTypeface(Typeface.DEFAULT);
 
                 } else {

@@ -53,35 +53,22 @@ import java.util.List;
 
 
 public class UserProfileFragment extends Fragment {
-    TextView tvUserName;
-    ImageView avatar;
-
-    private List<Configuration> listConfig = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private UserInfoAdapter infoAdapter;
-
     private static final String USERNAME_LABEL = "Username";
     private static final String EMAIL_LABEL = "Email";
     private static final String SIGNOUT_LABEL = "Sign out";
     private static final String RESETPASS_LABEL = "Change Password";
-
     private static final int PICK_IMAGE = 1994;
+    TextView tvUserName;
+    ImageView avatar;
+    private List<Configuration> listConfig = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private UserInfoAdapter infoAdapter;
     private LovelyProgressDialog waitingDialog;
 
     private DatabaseReference userDB;
     private FirebaseAuth mAuth;
     private User myAccount;
     private Context context;
-
-    public UserProfileFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     private ValueEventListener userListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -108,6 +95,40 @@ public class UserProfileFragment extends Fragment {
             Log.e(UserProfileFragment.class.getName(), "loadPost:onCancelled", databaseError.toException());
         }
     };
+    private View.OnClickListener onAvatarClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            new AlertDialog.Builder(context)
+                    .setTitle("Avatar")
+                    .setMessage("Are you sure want to change avatar profile?")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent();
+                            intent.setType("image/*");
+                            intent.setAction(Intent.ACTION_PICK);
+                            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    }).show();
+        }
+    };
+
+    public UserProfileFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -141,32 +162,6 @@ public class UserProfileFragment extends Fragment {
         waitingDialog = new LovelyProgressDialog(context);
         return view;
     }
-
-    private View.OnClickListener onAvatarClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-
-            new AlertDialog.Builder(context)
-                    .setTitle("Avatar")
-                    .setMessage("Are you sure want to change avatar profile?")
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Intent intent = new Intent();
-                            intent.setType("image/*");
-                            intent.setAction(Intent.ACTION_PICK);
-                            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
-                            dialogInterface.dismiss();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    }).show();
-        }
-    };
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -299,9 +294,12 @@ public class UserProfileFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     if (config.getLabel().equals(SIGNOUT_LABEL)) {
+                        signOutUser();
+
                         FirebaseAuth.getInstance().signOut();
                         FriendDB.getInstance(getContext()).dropDB();
                         GroupDB.getInstance(getContext()).dropDB();
+
                         ServiceUtils.stopServiceFriendChat(getContext().getApplicationContext(), true);
                         getActivity().finish();
                     }
@@ -311,7 +309,6 @@ public class UserProfileFragment extends Fragment {
                                 .inflate(R.layout.dialog_edit_username, (ViewGroup) getView(), false);
                         final EditText input = (EditText) vewInflater.findViewById(R.id.edit_username);
                         input.setText(myAccount.name);
-                        /*Hiển thị dialog với dEitText cho phép người dùng nhập username mới*/
                         new AlertDialog.Builder(context)
                                 .setTitle("Edit username")
                                 .setView(vewInflater)
@@ -351,6 +348,10 @@ public class UserProfileFragment extends Fragment {
                                     }
                                 }).show();
                     }
+                }
+
+                private void signOutUser() {
+                    userDB.child("status").child("isOnline").setValue("false");
                 }
             });
         }
