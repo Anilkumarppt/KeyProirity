@@ -9,6 +9,7 @@ public class Message {
     public long timestamp;
     public String contentType, contentLocation;
     private Boolean multimedia = false;
+    //
 
     public Message() {
     }
