@@ -7,7 +7,7 @@
 
             <corners android:radius="20dp" android:topRightRadius="0dp" />
 
-            <solid android:color="@color/colorAccent" />
+            <solid android:color="@color/wallet_holo_blue_light" />
 
             <size android:width="0dp" android:height="0dp" />
 

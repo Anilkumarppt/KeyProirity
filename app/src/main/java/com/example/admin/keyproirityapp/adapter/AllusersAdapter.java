@@ -37,14 +37,14 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyViewHolder> {
-    LovelyProgressDialog dialogWait;
     public List<String> allusersString;
+    LovelyProgressDialog dialogWait;
     Context ctx;
     Activity activity;
     View view;
     Dialog dialog;
+    int pos;
     private List<AllUsers> allUsersList;
-
 
     public AllusersAdapter(List<String> allusersString) {
         this.allusersString = allusersString;
@@ -58,56 +58,13 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
         view = LayoutInflater.from(parent.getContext()).inflate(R.layout.allusersitem, parent, false);
         final MyViewHolder myViewHolder = new MyViewHolder(view);
         dialogWait = new LovelyProgressDialog(activity);
         dialog = new Dialog(activity);
         dialog.setContentView(R.layout.dialog_friend);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        myViewHolder.layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TextView username = dialog.findViewById(R.id.dialog_name);
-                TextView email = dialog.findViewById(R.id.dialog_email);
-                CircleImageView profileImg = dialog.findViewById(R.id.dialog_userImg);
-                String name = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
-                final Button addFriend = dialog.findViewById(R.id.dialog__addfriend);
-
-                username.setText(name);
-                email.setText(allUsersList.get(myViewHolder.getAdapterPosition()).getEmail());
-                if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata() != null) {
-                    if (allUsersList.get(myViewHolder.getAdapterPosition()).getAvata().equals("default")) {
-                        profileImg.setImageResource(R.drawable.default_avata);
-
-                    } else {
-                        byte[] decodedString = Base64.decode(allUsersList.get(myViewHolder.getAdapterPosition()).avata, Base64.DEFAULT);
-                        Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                        profileImg.setImageBitmap(src);
-
-                    }
-                } else {
-                    profileImg.setImageResource(R.drawable.default_avata);
-                }
-
-                addFriend.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String friendid = allUsersList.get(myViewHolder.getAdapterPosition()).getUid();
-                        final String friendName = allUsersList.get(myViewHolder.getAdapterPosition()).getName();
-                        if (friendid.equals(StaticConfig.UID)) {
-                            Toast.makeText(view.getContext(), "this is your profile", Toast.LENGTH_SHORT).show();
-                        } else {
-                            boolean alreadyFrnd = checkBeforeAdd(friendid);
-
-                        }
-
-                        dialog.cancel();
-                    }
-                });
-                dialog.show();
-
-            }
-        });
 
         //dialog.setContentView(R.layout.);
 
@@ -130,6 +87,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
                     }
                     if (count >= 1) {
                         Toast.makeText(activity, "already a friend", Toast.LENGTH_SHORT).show();
+                        dialog.cancel();
                     } else {
                         addFriend(friendId, true);
                         //addFriendToDB(friendId);
@@ -232,7 +190,7 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         if (allUsersList.size() > 0) {
             holder.username.setText(allUsersList.get(position).getName());
-            Log.d("usernames", allUsersList.get(position).name);
+//            Log.d("usernames", allUsersList.get(position).name);
             if (allUsersList.get(position).getAvata() != null) {
                 if (allUsersList.get(position).getAvata().equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     holder.profileImage.setImageResource(R.drawable.default_avata);
@@ -277,6 +235,51 @@ public class AllusersAdapter extends RecyclerView.Adapter<AllusersAdapter.MyView
         *///  Picasso.with(ctx).load("userprofilepic").placeholder(R.drawable.default_avata).into(holder.profileImage);
 
         //holder.profileImage.setImageResource(R.drawable.default_avata);
+        holder.layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TextView username = dialog.findViewById(R.id.dialog_name);
+                TextView email = dialog.findViewById(R.id.dialog_email);
+                CircleImageView profileImg = dialog.findViewById(R.id.dialog_userImg);
+                String name = allUsersList.get(holder.getAdapterPosition()).getName();
+                final Button addFriend = dialog.findViewById(R.id.dialog__addfriend);
+                pos = holder.getAdapterPosition();
+                username.setText(name);
+                email.setText(allUsersList.get(holder.getAdapterPosition()).getEmail());
+                if (allUsersList.get(holder.getAdapterPosition()).getAvata() != null) {
+                    if (allUsersList.get(holder.getAdapterPosition()).getAvata().equals("default")) {
+                        profileImg.setImageResource(R.drawable.default_avata);
+
+                    } else {
+                        byte[] decodedString = Base64.decode(allUsersList.get(holder.getAdapterPosition()).avata, Base64.DEFAULT);
+                        Bitmap src = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        profileImg.setImageBitmap(src);
+
+                    }
+                } else {
+                    profileImg.setImageResource(R.drawable.default_avata);
+                }
+
+                addFriend.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String friendid = allUsersList.get(position).getUid();
+                        final String friendName = allUsersList.get(position).getName();
+                        if (friendid.equals(StaticConfig.UID)) {
+                            Toast.makeText(view.getContext(), "this is your profile", Toast.LENGTH_SHORT).show();
+                        } else {
+                            boolean alreadyFrnd = checkBeforeAdd(friendid);
+
+                        }
+
+                        dialog.cancel();
+                    }
+                });
+                dialog.show();
+
+            }
+        });
+
     }
 
     @Override

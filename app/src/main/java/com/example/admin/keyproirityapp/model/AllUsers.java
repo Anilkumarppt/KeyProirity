@@ -7,7 +7,34 @@ public class AllUsers {
     public String mobile;
     public Status status;
     String uid;
-    long timestamp;
+    Long timestamp;
+
+    public AllUsers() {
+        status = new Status();
+        status.setOnline(status.isOnline);
+        status.setTimestamp(status.timestamp);
+    }
+    public AllUsers(String name, String email, String avata, String mobile, Status status) {
+        this.name = name;
+        this.email = email;
+        this.avata = avata;
+        this.mobile = mobile;
+        this.status = status;
+
+
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public Long getStatus() {
         return timestamp;
@@ -23,22 +50,6 @@ public class AllUsers {
 
     public void setUid(String uid) {
         this.uid = uid;
-    }
-
-    public AllUsers() {
-        status = new Status();
-        status.isOnline = status.isOnline;
-        status.timestamp = status.timestamp;
-    }
-
-    public AllUsers(String name, String email, String avata, String mobile, Status status) {
-        this.name = name;
-        this.email = email;
-        this.avata = avata;
-        this.mobile = mobile;
-        this.status = status;
-
-
     }
 
     public String getName() {

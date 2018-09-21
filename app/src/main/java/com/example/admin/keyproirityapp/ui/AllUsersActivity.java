@@ -28,12 +28,12 @@ public class AllUsersActivity extends AppCompatActivity {
     Query query;
     RecyclerView recyclerView;
     Toolbar allusersToolbar;
-    private DatabaseReference allUsersDatabaseref;
     AllusersAdapter myAdapter;
     List<AllUsers> listUsers;
     List<String> usersId;
-    private ArrayList<String> listFriendID;
     LovelyProgressDialog dialogWait;
+    private DatabaseReference allUsersDatabaseref;
+    private ArrayList<String> listFriendID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,6 @@ public class AllUsersActivity extends AppCompatActivity {
                 .setTopColorRes(R.color.colorPrimary)
                 .show();
 
-        allUsersDatabaseref = FirebaseDatabase.getInstance().getReference();
         listUsers = new ArrayList<>();
         myAdapter = new AllusersAdapter(AllUsersActivity.this, listUsers);
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("user");
@@ -87,15 +86,15 @@ public class AllUsersActivity extends AppCompatActivity {
         if (dataSnapshot.exists()) {
             for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                 AllUsers usersList = new AllUsers();
-                String key = dsp.getKey().toString();
+                String key = dsp.getKey();
                 usersList.setUid(key);
                 usersId.add(key);
                 usersList.setName(dsp.child("name").getValue(String.class));
                 usersList.setMobile(dsp.child("mobile").getValue(String.class));
                 usersList.setAvata(dsp.child("avata").getValue(String.class));
                 usersList.setEmail(dsp.child("email").getValue(String.class));
-                Long timestamp = Long.valueOf(dsp.child("status" + "/" + "timestamp").getValue(Long.class));
-                usersList.setStatus(timestamp);
+                /*Long timestamp = dsp.child("status" + "/" + "timestamp").getValue(Long.class);
+                usersList.setStatus(timestamp);*/
                 listUsers.add(usersList);
 
             }

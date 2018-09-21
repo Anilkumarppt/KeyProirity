@@ -1,46 +1,40 @@
 package com.example.admin.keyproirityapp.model;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class Message {
+/**
+ * Created by Dell on 8/31/2018.
+ */
+
+public class GroupMessage {
     public String idSender;
     public String idReceiver;
     public String text;
-    public String name;
     public long timestamp;
-    public String contentType, contentLocation;
+    String senderName;
+    List<GroupMessage> groupMessageList;
     private Boolean multimedia = false;
+    private String contentType;
+    private String contentLocation = "";
 
-    public Message() {
-    }
-
-    public Message(String idSender, String idReceiver, String text, long timestamp, String contentType, String name, String contentLocation) {
+    public GroupMessage(String idSender, String idReceiver, String text, long timestamp, Boolean multimedia, String contentType, String senderName) {
         this.idSender = idSender;
         this.idReceiver = idReceiver;
         this.text = text;
         this.timestamp = timestamp;
-        this.multimedia = false;
+        this.multimedia = multimedia;
         this.contentType = contentType;
-        this.name = name;
-        this.contentLocation = contentLocation;
+        this.senderName = senderName;
+        groupMessageList = new ArrayList<>();
     }
 
-    //Constructor for the Multimedia
-    public Message(String idSender, String idReceiver, Long timestamp, String contentType, String contentLocation, String text) {
-        this.idSender = idSender;
-        this.idReceiver = idReceiver;
-        this.text = text;
-        this.timestamp = timestamp;
-        this.multimedia = true;
-        this.contentType = contentType;
-        this.contentLocation = contentLocation;
-
+    public List<GroupMessage> getGroupMessageList() {
+        return groupMessageList;
     }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "timestamp=" + timestamp +
-                '}';
+    public void setGroupMessageList(List<GroupMessage> groupMessageList) {
+        this.groupMessageList = groupMessageList;
     }
 
     public String getIdSender() {
@@ -82,7 +76,6 @@ public class Message {
     public void setMultimedia(Boolean multimedia) {
         this.multimedia = multimedia;
     }
-    //Constructor for Text Message
 
     public String getContentType() {
         return contentType;
@@ -90,5 +83,21 @@ public class Message {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getContentLocation() {
+        return contentLocation;
+    }
+
+    public void setContentLocation(String contentLocation) {
+        this.contentLocation = contentLocation;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 }

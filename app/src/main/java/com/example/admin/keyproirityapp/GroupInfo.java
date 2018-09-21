@@ -47,22 +47,23 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupInfo extends AppCompatActivity {
+    private static final int PICK_IMAGE = 1994;
     CircleImageView groupIcon;
     TextView txtGroupname;
     RecyclerView membersList;
-    private ListFriend dataListFriend = null;
-    private static final int PICK_IMAGE = 1994;
-    private ListFriend listFriend;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference groupReference;
     String mGroupId, mGroupName;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private GroupMembersAdapter membersAdapter;
     List<User> list = new ArrayList<>();
     TextView groupName;
     Toolbar toolbar;
     Context context = this;
     DatabaseReference groupDB;
+    HashMap<String, String> tokenHashmap;
+    private ListFriend dataListFriend = null;
+    private ListFriend listFriend;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private GroupMembersAdapter membersAdapter;
     private ArrayList<String> listFriendID = null;
     private LovelyProgressDialog waitingDialog;
     private StorageReference mStorage;
@@ -84,6 +85,7 @@ public class GroupInfo extends AppCompatActivity {
         groupDB = FirebaseDatabase.getInstance().getReference().child("group" + "/" + mGroupId);
         groupIcon = findViewById(R.id.groupicon);
         setgorupImage();
+        tokenHashmap = new HashMap<>();
         txtGroupname = findViewById(R.id.txt_groupname);
         membersList = findViewById(R.id.members_recycler_view);
         membersList.setHasFixedSize(true);
@@ -188,6 +190,13 @@ public class GroupInfo extends AppCompatActivity {
                         user.name = (String) mapUserInfo.get("name");
                         user.avata = (String) mapUserInfo.get("avata");
                         user.email = (String) mapUserInfo.get("email");
+                        if (mapUserInfo.get("deviceToken") != null) {
+                            user.deviceToken = (String) mapUserInfo.get("deviceToken");
+                            tokenHashmap.put(id, (String) mapUserInfo.get("deviceToken"));
+                            FirebaseDatabase.getInstance().getReference("group" + "/" + mGroupId).child("membersTokens")
+                                    .setValue(tokenHashmap);
+
+                        }
                         list.add(user);
                     }
                     getAllFriendInfo(i + 1);
@@ -286,5 +295,6 @@ public class GroupInfo extends AppCompatActivity {
             }
         }
     }
+
 
 }

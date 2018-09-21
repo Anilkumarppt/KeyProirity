@@ -15,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/gradient"
+            android:onClick="groupInfo"
             app:navigationIcon="@drawable/ic_back" />
 
     </android.support.design.widget.AppBarLayout>
@@ -34,15 +35,25 @@
             android:gravity="center"
             android:text="Empty" />
 
+        <!--<android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/activity_thread_editor_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/simple_padding_medium"
+            tools:listitem="@layout/item_message_sent"
+            >
+
+        </android.support.v7.widget.RecyclerView>
+-->
         <com.example.admin.keyproirityapp.widgets.EmptyStateRecyclerView
-            android:id="@+id/activity_thread_messages_recycler"
+            android:id="@+id/groupmessage_recylcer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/activity_thread_editor_parent"
             android:clipToPadding="false"
             android:paddingBottom="@dimen/simple_padding_medium"
             tools:listitem="@layout/item_message_sent" />
-
         <RelativeLayout
             android:id="@+id/activity_thread_editor_parent"
             android:layout_width="match_parent"
@@ -60,6 +71,7 @@
                 android:layout_margin="@dimen/simple_padding_small"
                 android:clickable="true"
                 android:focusable="true"
+                android:onClick="sendGroupmessage"
                 android:src="@drawable/ic_send"
                 android:theme="@style/SendFabTheme"
                 app:elevation="0dp"

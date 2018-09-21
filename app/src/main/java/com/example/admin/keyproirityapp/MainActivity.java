@@ -30,13 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private static String TAG = "MainActivity";
-    private ViewPager viewPager;
-    private TabLayout tabLayout = null;
     public static String STR_FRIEND_FRAGMENT = "FRIEND";
     public static String STR_GROUP_FRAGMENT = "GROUP";
     public static String STR_INFO_FRAGMENT = "INFO";
-
+    private static String TAG = "MainActivity";
+    private ViewPager viewPager;
+    private TabLayout tabLayout = null;
     private FloatingActionButton floatButton;
     private ViewPagerAdapter adapter;
 
@@ -154,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                     floatButton.setImageResource(R.drawable.plus);
                 } else if (adapter.getItem(position) instanceof GroupFragment) {
                     floatButton.setVisibility(View.VISIBLE);
-                    floatButton.setOnClickListener(((GroupFragment) adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
+                    floatButton.setOnClickListener(((GroupFragment) adapter.getItem(position)).onClickFloatButton.getInstance());
                     floatButton.setImageResource(R.drawable.ic_float_add_group);
                 } else {
                     floatButton.setVisibility(View.GONE);

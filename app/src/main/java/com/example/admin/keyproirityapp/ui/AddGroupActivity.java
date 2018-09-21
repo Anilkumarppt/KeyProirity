@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,18 +26,28 @@ import android.widget.Toast;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.FriendDB;
 import com.example.admin.keyproirityapp.database.GroupDB;
+import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Group;
 import com.example.admin.keyproirityapp.model.ListFriend;
 import com.example.admin.keyproirityapp.model.Room;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.yarolegovich.lovelydialog.LovelyInfoDialog;
 import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -44,29 +55,37 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AddGroupActivity extends AppCompatActivity {
 
+    private static final String TAG = AppCompatActivity.class.getSimpleName();
+    public DatabaseReference groupDB;
+    DatabaseReference notificationReference;
+    String groupname;
     private RecyclerView recyclerListFriend;
     private ListPeopleAdapter adapter;
     private ListFriend listFriend;
     private LinearLayout btnAddGroup;
     private Set<String> listIDChoose;
+    private List<String> listIdFriend;
     private Set<String> listIDRemove;
     private EditText editTextGroupName;
     private TextView txtGroupIcon, txtActionName;
     private LovelyProgressDialog dialogWait;
     private boolean isEditGroup;
     private Group groupEdit;
-
+    private ArrayList<String> listFriendID = null;
+    private HashMap<String, String> tokenMap;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_group);
-
         Intent intentData = getIntent();
         txtActionName = (TextView) findViewById(R.id.txtActionName);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         listFriend = FriendDB.getInstance(this).getListFriend();
         listIDChoose = new HashSet<>();
         listIDRemove = new HashSet<>();
+        listIdFriend = new ArrayList<>();
+        tokenMap = new HashMap<>();
+        groupDB = FirebaseDatabase.getInstance().getReference("group");
         listIDChoose.add(StaticConfig.UID);
         btnAddGroup = (LinearLayout) findViewById(R.id.btnAddGroup);
         editTextGroupName = (EditText) findViewById(R.id.editGroupName);
@@ -141,9 +160,12 @@ public class AddGroupActivity extends AppCompatActivity {
         for (String id : listIDChoose) {
             room.member.add(id);
         }
+        //listIdFriend.addAll(listIDChoose);
+        Log.d("Room members", room.member.toString());
         room.groupInfo.put("name", editTextGroupName.getText().toString());
         room.groupInfo.put("admin", StaticConfig.UID);
         room.groupInfo.put("groupIcon", StaticConfig.STR_DEFAULT_BASE64);
+        //getDeviceTokes(0);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -179,6 +201,7 @@ public class AddGroupActivity extends AppCompatActivity {
         ;
     }
 
+
     private void createGroup() {
         //Show dialog wait
         dialogWait.setIcon(R.drawable.ic_add_group_dialog)
@@ -187,11 +210,18 @@ public class AddGroupActivity extends AppCompatActivity {
                 .show();
 
         final String idGroup = (StaticConfig.UID + System.currentTimeMillis()).hashCode() + "";
+        SharedPreferenceHelper.getInstance(getApplicationContext()).setGroupId(idGroup);
         Room room = new Room();
-        for (String id : listIDChoose) {
+        room.member.addAll(listIDChoose);
+        /*for (String id : listIDChoose) {
             room.member.add(id);
-        }
-        room.groupInfo.put("name", editTextGroupName.getText().toString());
+             //getDeviceTokes(id);
+        }*/
+
+        listIdFriend.addAll(listIDChoose);
+        Log.d("List Id Choose", listIdFriend.toString());
+        groupname = editTextGroupName.getText().toString();
+        room.groupInfo.put("name", groupname);
         room.groupInfo.put("admin", StaticConfig.UID);
         room.groupInfo.put("groupIcon", StaticConfig.STR_DEFAULT_BASE64);
         FirebaseDatabase.getInstance().getReference().child("group/" + idGroup).setValue(room).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -200,7 +230,9 @@ public class AddGroupActivity extends AppCompatActivity {
                 addRoomForUser(idGroup, 0);
             }
         });
+
     }
+
 
     private void deleteRoomForUser(final String roomId, final int userIndex) {
         if (userIndex == listIDRemove.size()) {
@@ -244,9 +276,26 @@ public class AddGroupActivity extends AppCompatActivity {
         }
     }
 
+    public void sendNotification(final String groupId) {
+        notificationReference = FirebaseDatabase.getInstance().getReference("Notifications" + "/" + "GroupNotifications/").child(groupId).push();
+        Map<String, Object> notificationMessage = new HashMap<>();
+        notificationMessage.put("message", "New Group Created");
+        notificationMessage.put("from", StaticConfig.UID);
+        notificationMessage.put("roomId", groupId);
+        notificationMessage.put("groupname", groupname);
+        notificationReference.setValue(notificationMessage).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(getApplicationContext(), "NotificationSent", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
     private void addRoomForUser(final String roomId, final int userIndex) {
         if (userIndex == listIDChoose.size()) {
             if (!isEditGroup) {
+                sendNotification(roomId);
                 dialogWait.dismiss();
                 Toast.makeText(this, "Create group success", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK, null);
@@ -255,10 +304,43 @@ public class AddGroupActivity extends AppCompatActivity {
                 deleteRoomForUser(roomId, 0);
             }
         } else {
+            final Group group = new Group();
+
+            String memberId = String.valueOf(listIDChoose.toArray()[userIndex]);
+            Log.d(TAG, "member id" + memberId);
+            FirebaseDatabase.getInstance().getReference().child("user/" + memberId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null && dataSnapshot.hasChild("deviceToken")) {
+                                Room room = new Room();
+                                String groupId = SharedPreferenceHelper.getInstance(getApplicationContext()).getGroupId();
+                                String deviceToken = dataSnapshot.child("deviceToken").getValue(String.class);
+                                String name = dataSnapshot.child("name").getValue(String.class);
+                                group.memberTokens.add(deviceToken);
+                                FirebaseDatabase.getInstance().getReference("group" + "/" + groupId).child("membersTokens")
+                                        .setValue(group.memberTokens);
+
+                                tokenMap.put("deviceToken", deviceToken);
+                                room.memberTokens.add(deviceToken);
+                                Log.d(TAG, "Device Tokens Map" + tokenMap.toString());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
             FirebaseDatabase.getInstance().getReference().child("user/" + listIDChoose.toArray()[userIndex] + "/group/" + roomId).setValue(roomId).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
+                    /**/
+                    //getDeviceTokes(memberId);
                     addRoomForUser(roomId, userIndex + 1);
+
+
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -305,7 +387,6 @@ class ListPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.btnAddGroup = btnAddGroup;
         this.listIDChoose = listIDChoose;
         this.listIDRemove = listIDRemove;
-
         this.isEdit = isEdit;
         this.editGroup = editGroup;
     }
@@ -322,6 +403,7 @@ class ListPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ((ItemFriendHolder) holder).txtEmail.setText(listFriend.getListFriend().get(position).email);
         String avata = listFriend.getListFriend().get(position).avata;
         final String id = listFriend.getListFriend().get(position).id;
+
         if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
             byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
             ((ItemFriendHolder) holder).avata.setImageBitmap(BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
@@ -347,9 +429,28 @@ class ListPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         });
         if (isEdit && editGroup.member.contains(id)) {
             ((ItemFriendHolder) holder).checkBox.setChecked(true);
+            Log.d("RecyclerView id", id);
+            //getToken(id);
         } else if (editGroup != null && !editGroup.member.contains(id)) {
             ((ItemFriendHolder) holder).checkBox.setChecked(false);
         }
+    }
+
+    private void getToken(String id) {
+        FirebaseDatabase.getInstance().getReference(StaticConfig.FIREBASE_USERROOT).child(id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && dataSnapshot.hasChild("deviceToken")) {
+                    Log.d("device Tokens", dataSnapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     @Override

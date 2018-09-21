@@ -4,7 +4,7 @@
     android:id="@+id/item_message_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="right"
+    android:gravity="left"
     android:orientation="vertical"
     tools:ignore="RtlHardcoded">
 
@@ -14,10 +14,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/simple_padding_small"
         android:layout_marginTop="@dimen/simple_padding_large"
-        android:gravity="right"
-
+        android:gravity="center"
         android:text="@string/placeholder"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorTextSecondary"
         android:textSize="@dimen/text_size_small" />
 
     <TextView
@@ -25,17 +24,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/simple_padding_tiny"
-        android:layout_marginLeft="@dimen/simple_padding_huge"
-        android:layout_marginRight="@dimen/simple_padding_medium"
+        android:layout_marginLeft="@dimen/simple_padding_medium"
+        android:layout_marginRight="@dimen/simple_padding_huge"
         android:layout_marginTop="@dimen/simple_padding_tiny"
-        android:background="@drawable/message_sent_chip"
+        android:background="@drawable/message_received_chip"
         android:clickable="true"
         android:longClickable="true"
         android:padding="@dimen/simple_padding_medium"
         android:paddingEnd="@dimen/simple_padding_large"
         android:paddingStart="@dimen/simple_padding_large"
         android:text="@string/placeholder"
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="@dimen/text_size_secondary" />
 
 </LinearLayout>

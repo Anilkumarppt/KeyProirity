@@ -14,10 +14,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/simple_padding_small"
         android:layout_marginTop="@dimen/simple_padding_large"
-        android:gravity="right"
-
+        android:gravity="center"
         android:text="@string/placeholder"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorTextSecondary"
         android:textSize="@dimen/text_size_small" />
 
     <TextView

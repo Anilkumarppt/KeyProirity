@@ -23,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.admin.keyproirityapp.BasicTest;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.FriendDB;
 import com.example.admin.keyproirityapp.database.GroupDB;
@@ -57,7 +56,6 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private ArrayList<Group> listGroup;
     private ListGroupsAdapter adapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
     public GroupFragment() {
         // Required empty public constructor
     }
@@ -71,7 +69,6 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_group, container, false);
-
         listGroup = GroupDB.getInstance(getContext()).getListGroups();
         recyclerListGroups = (RecyclerView) layout.findViewById(R.id.recycleListGroup);
         mSwipeRefreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipeRefreshLayout);
@@ -94,7 +91,7 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                 .setTopColorRes(R.color.colorAccent);
 
         if (listGroup.size() == 0) {
-            //Ket noi server hien thi group
+
             mSwipeRefreshLayout.setRefreshing(true);
             getListGroup();
         }
@@ -153,9 +150,11 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
                         HashMap mapGroupInfo = (HashMap) mapGroup.get("groupInfo");
                         for (String idMember : member) {
                             listGroup.get(indexGroup).member.add(idMember);
+                            Log.d("IdMember", idMember);
                         }
                         listGroup.get(indexGroup).groupInfo.put("name", (String) mapGroupInfo.get("name"));
                         listGroup.get(indexGroup).groupInfo.put("admin", (String) mapGroupInfo.get("admin"));
+
                     }
                     GroupDB.getInstance(getContext()).addGroup(listGroup.get(indexGroup));
                     Log.d("GroupFragment", listGroup.get(indexGroup).id + ": " + dataSnapshot.toString());
@@ -350,16 +349,13 @@ public class GroupFragment extends Fragment implements SwipeRefreshLayout.OnRefr
 
     public class FragGroupClickFloatButton implements View.OnClickListener {
 
-        Context context;
-
-        public FragGroupClickFloatButton getInstance(Context context) {
-            this.context = context;
+        public FragGroupClickFloatButton getInstance() {
             return this;
         }
 
         @Override
         public void onClick(View view) {
-            startActivity(new Intent(getContext(), AddGroupActivity.class));
+            startActivity(new Intent(getContext(), CreateGroupActivity.class));
         }
     }
 }
@@ -402,7 +398,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     listFriend = FriendDB.getInstance(context).getListFriend();
                 }
                 //Intent intent = new Intent(context, BasicTest.class);
-                Intent intent = new Intent(context, BasicTest.class);
+              /*  Intent intent = new Intent(context, BasicTest.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
                 ArrayList<CharSequence> idFriend = new ArrayList<>();
                 BasicTest.bitmapAvataFriend = new HashMap<>();
@@ -422,8 +418,8 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, listGroup.get(position).id);
                 intent.putExtra(StaticConfig.PERSONAL_CHAT, "group");
                 context.startActivity(intent);
-
-               /* Intent intent=new Intent(context,GroupChatActivity.class);
+*/
+                Intent intent = new Intent(context, GroupChatActivity.class);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, groupName);
                 ArrayList<CharSequence> idFriend = new ArrayList<>();
                 GroupChatActivity.bitmapAvataFriend = new HashMap<>();
@@ -442,7 +438,7 @@ class ListGroupsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                 intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, listGroup.get(position).id);
                 intent.putExtra(StaticConfig.PERSONAL_CHAT, "group");
-                context.startActivity(intent);*/
+                context.startActivity(intent);
             }
         });
     }

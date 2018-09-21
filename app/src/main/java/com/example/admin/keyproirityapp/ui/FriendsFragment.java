@@ -24,7 +24,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +33,7 @@ import com.example.admin.keyproirityapp.database.FriendDB;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Friend;
 import com.example.admin.keyproirityapp.model.ListFriend;
+import com.example.admin.keyproirityapp.service.MessagingService;
 import com.example.admin.keyproirityapp.service.ServiceUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -89,6 +89,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
             public void onTick(long l) {
                 ServiceUtils.updateFriendStatus(getContext(), dataListFriend);
                 ServiceUtils.updateUserStatus(getContext());
+
             }
 
             @Override
@@ -190,6 +191,8 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         user.name = (String) mapUserInfo.get("name");
                         user.email = (String) mapUserInfo.get("email");
                         user.avata = (String) mapUserInfo.get("avata");
+                        user.mobile = (String) mapUserInfo.get("mobile");
+                        user.deviceToken = (String) mapUserInfo.get("deviceToken");
                         user.id = id;
                         user.idRoom = id.compareTo(StaticConfig.UID) > 0 ? (StaticConfig.UID + id).hashCode() + "" : "" + (id + StaticConfig.UID).hashCode();
                         dataListFriend.getListFriend().add(user);
@@ -207,6 +210,11 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        //getListFriendUId();
+    }
 
     private void getListFriendUId() {
         FirebaseDatabase.getInstance().getReference().child("friend/" + StaticConfig.UID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -386,6 +394,7 @@ public class FriendsFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
 
     }
+
 }
 
 class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -411,14 +420,15 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mapQueryOnline = new HashMap<>();
         this.fragment = fragment;
         dialogWaitDeleting = new LovelyProgressDialog(context);
+
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dialog_profileview);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.rc_item_friend, parent, false);
-        dialog = new Dialog(parent.getContext());
-        dialog.setContentView(R.layout.dialog_profileview);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return new ItemFriendViewHolder(context, view);
     }
 
@@ -439,17 +449,13 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND, name);
                         ArrayList<CharSequence> idFriend = new ArrayList<CharSequence>();
                         idFriend.add(id);
-                        intent.putExtra("from_senderId", id);
+                        intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ID, id);
                         intent.putExtra(StaticConfig.PERSONAL_CHAT, "onetoone");
                         intent.putCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID, idFriend);
                         intent.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID, idRoom);
+                        intent.putExtra(MessagingService.FCM_SENDER_ID, id);
                         BasicTest.bitmapAvataFriend = new HashMap<>();
-                        if (!avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
-                            byte[] decodedString = Base64.decode(avata, Base64.DEFAULT);
-                            BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
-                        } else {
-                            BasicTest.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
-                        }
+                        BasicTest.bitmapAvataFriend.put(id, avata);
                         mapMark.put(id, null);
                         fragment.startActivityForResult(intent, FriendsFragment.ACTION_START_CHAT);
                     }
@@ -580,10 +586,10 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             @Override
             public void onClick(View view) {
                 ImageView profileImage = dialog.findViewById(R.id.userImage);
-                ImageButton dialogChat = dialog.findViewById(R.id.message_dialog);
-                ImageButton dialogCall = dialog.findViewById(R.id.call_dialog);
-                ImageButton dialogVideo = dialog.findViewById(R.id.videocall_dialog);
-                ImageButton dialogInfo = dialog.findViewById(R.id.info_dialog);
+                View dialogChat = dialog.findViewById(R.id.message_dialog);
+                View dialogCall = dialog.findViewById(R.id.call_dialog);
+                View dialogVideo = dialog.findViewById(R.id.videocall_dialog);
+                View dialogInfo = dialog.findViewById(R.id.info_dialog);
                 if (listFriend.getListFriend().get(position).avata.equals(StaticConfig.STR_DEFAULT_BASE64)) {
                     profileImage.setImageResource(R.drawable.default_avata);
                 } else {
@@ -605,9 +611,19 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mapChildListenerOnline.put(id, new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                 /* for(DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                      Status status=dataSnapshot1.getValue(Status.class);
+                      if(status.isOnline){
+                          listFriend.getListFriend().get(position).status.isOnline = true;
+                          notifyDataSetChanged();
+                      }
+                  }
+*/
+                    Log.d("Status SnapShot", String.valueOf(dataSnapshot.child("isOnline").getValue(Boolean.class)));
                     if (dataSnapshot.getValue() != null && dataSnapshot.getKey().equals("isOnline")) {
-                        Log.d("FriendsFragment add " + id, (boolean) dataSnapshot.getValue() + "");
-                        listFriend.getListFriend().get(position).status.isOnline = (boolean) dataSnapshot.getValue();
+                        // Log.d("FriendsFragment add " + id, (boolean) dataSnapshot.getValue() + "");
+
+                        listFriend.getListFriend().get(position).status.isOnline = dataSnapshot.getKey().equals("value");
                         notifyDataSetChanged();
                     }
                 }
@@ -615,7 +631,7 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                     if (dataSnapshot.getValue() != null && dataSnapshot.getKey().equals("isOnline")) {
-                        Log.d("FriendsFragment change " + id, (boolean) dataSnapshot.getValue() + "");
+                        // Log.d("FriendsFragment change " + id, (boolean) dataSnapshot.getValue() + "");
                         listFriend.getListFriend().get(position).status.isOnline = (boolean) dataSnapshot.getValue();
                         notifyDataSetChanged();
                     }

@@ -30,7 +30,7 @@ public class ChatOffline extends Application {
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
-       /* if(currentUser!=null){
+        /*if(currentUser!=null){
             String  OnlineUserid=mAuth.getCurrentUser().getUid();
             UserDatabaseReference=FirebaseDatabase.getInstance().getReference().child("user")
                     .child(OnlineUserid);

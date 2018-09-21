@@ -7,11 +7,16 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.admin.keyproirityapp.database.SharedPreferenceHelper;
 import com.example.admin.keyproirityapp.database.StaticConfig;
 import com.example.admin.keyproirityapp.model.Friend;
 import com.example.admin.keyproirityapp.model.ListFriend;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -118,6 +123,23 @@ public class ServiceUtils {
         }
     }
 
+    public static void updateDeviceToke(Context context, String token) {
+        HashMap<String, Object> devicetoken = new HashMap<>();
+        devicetoken.put("deviceToken", token);
+        String udi = FirebaseAuth.getInstance().getUid();
+        if (udi != null) {
+            FirebaseDatabase.getInstance().getReference().child("user/" + udi).updateChildren(devicetoken)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isComplete()) {
+                                Log.d("updateToken", "Sucessfully Update the Token");
+                            }
+                        }
+                    });
+        }
+
+    }
     public static void updateFriendStatus(Context context, ListFriend listFriend) {
         if (isNetworkConnected(context)) {
             for (Friend friend : listFriend.getListFriend()) {
@@ -127,7 +149,7 @@ public class ServiceUtils {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
                             HashMap mapStatus = (HashMap) dataSnapshot.getValue();
-                            if ((boolean) mapStatus.get("isOnline") && (System.currentTimeMillis() - (long) mapStatus.get("timestamp")) > StaticConfig.TIME_TO_OFFLINE) {
+                            if (Boolean.parseBoolean(String.valueOf(mapStatus.get("isOnline"))) && (System.currentTimeMillis() - Long.parseLong(String.valueOf((Long) mapStatus.get("timestamp")))) > StaticConfig.TIME_TO_OFFLINE) {
                                 FirebaseDatabase.getInstance().getReference().child("user/" + fid + "/status/isOnline").setValue(false);
                             }
                         }

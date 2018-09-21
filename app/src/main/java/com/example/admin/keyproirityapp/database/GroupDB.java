@@ -14,14 +14,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GroupDB {
+    private static final String TEXT_TYPE = " TEXT";
+    private static final String COMMA_SEP = ",";
+    private static final String SQL_CREATE_ENTRIES =
+            "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" +
+                    FeedEntry.COLUMN_GROUP_ID + TEXT_TYPE + COMMA_SEP +
+                    FeedEntry.COLUMN_GROUP_NAME + TEXT_TYPE + COMMA_SEP +
+                    FeedEntry.COLUMN_GROUP_ADMIN + TEXT_TYPE + COMMA_SEP +
+                    GroupDB.FeedEntry.COLUMN_GROUP_MEMBER + TEXT_TYPE + COMMA_SEP +
+                    "PRIMARY KEY (" + GroupDB.FeedEntry.COLUMN_GROUP_ID + COMMA_SEP +
+                    GroupDB.FeedEntry.COLUMN_GROUP_MEMBER + "))";
+    private static final String SQL_DELETE_ENTRIES =
+            "DROP TABLE IF EXISTS " + GroupDB.FeedEntry.TABLE_NAME;
     private static GroupDB.GroupDBHelper mDbHelper = null;
+    private static GroupDB instance = null;
+
 
     // To prevent someone from accidentally instantiating the contract class,
     // make the constructor private.
     private GroupDB() {
     }
-
-    private static GroupDB instance = null;
 
     public static GroupDB getInstance(Context context) {
         if (instance == null) {
@@ -51,7 +63,6 @@ public class GroupDB {
         db.delete(FeedEntry.TABLE_NAME, FeedEntry.COLUMN_GROUP_ID + " = " + idGroup, null);
     }
 
-
     public void addListGroup(ArrayList<Group> listGroup) {
         for (Group group : listGroup) {
             addGroup(group);
@@ -75,6 +86,23 @@ public class GroupDB {
         return newGroup;
     }
 
+    /* public GroupModel getGroupModel(String id) {
+         SQLiteDatabase db = mDbHelper.getReadableDatabase();
+         Cursor cursor = db.rawQuery("select * from " + GroupDB.FeedEntry.TABLE_NAME + " where " + FeedEntry.COLUMN_GROUP_ID + " = " + id, null);
+         GroupModel newGroup = new GroupModel();
+         while (cursor.moveToNext()) {
+             String idGroup = cursor.getString(0);
+             String nameGroup = cursor.getString(1);
+             String admin = cursor.getString(2);
+             String member = cursor.getString(3);
+             newGroup.setId(idGroup);
+             newGroup.setName(nameGroup);
+             newGroup.setAdmin(admin);
+             newGroup.setListFriend(member);
+         }
+         return newGroup;
+     }
+ */
     public ArrayList<Group> getListGroups() {
         Map<String, Group> mapGroup = new HashMap<>();
         ArrayList<String> listKey = new ArrayList<>();
@@ -119,29 +147,15 @@ public class GroupDB {
         db.execSQL(SQL_CREATE_ENTRIES);
     }
 
-
     public static class FeedEntry implements BaseColumns {
         static final String TABLE_NAME = "groups";
         static final String COLUMN_GROUP_ID = "groupID";
         static final String COLUMN_GROUP_NAME = "name";
         static final String COLUMN_GROUP_ADMIN = "admin";
         static final String COLUMN_GROUP_MEMBER = "memberID";
+        static final String COLUMN_GROUP_MEMBER_TOKEN = "tokenID";
+
     }
-
-    private static final String TEXT_TYPE = " TEXT";
-    private static final String COMMA_SEP = ",";
-    private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" +
-                    FeedEntry.COLUMN_GROUP_ID + TEXT_TYPE + COMMA_SEP +
-                    FeedEntry.COLUMN_GROUP_NAME + TEXT_TYPE + COMMA_SEP +
-                    FeedEntry.COLUMN_GROUP_ADMIN + TEXT_TYPE + COMMA_SEP +
-                    GroupDB.FeedEntry.COLUMN_GROUP_MEMBER + TEXT_TYPE + COMMA_SEP +
-                    "PRIMARY KEY (" + GroupDB.FeedEntry.COLUMN_GROUP_ID + COMMA_SEP +
-                    GroupDB.FeedEntry.COLUMN_GROUP_MEMBER + "))";
-
-    private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + GroupDB.FeedEntry.TABLE_NAME;
-
 
     private static class GroupDBHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.

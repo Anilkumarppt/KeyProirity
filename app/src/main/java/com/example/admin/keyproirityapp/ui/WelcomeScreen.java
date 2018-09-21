@@ -58,5 +58,6 @@ public class WelcomeScreen extends AppCompatActivity {
             Intent loginIntent = new Intent(WelcomeScreen.this, LoginActivity.class);
             startActivity(loginIntent);
         }
+        finish();
     }
 }

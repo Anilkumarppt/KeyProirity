@@ -1,12 +1,9 @@
 package com.example.admin.keyproirityapp;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.admin.keyproirityapp.database.StaticConfig;
 
 public class NotificationActivity extends AppCompatActivity {
 
@@ -21,17 +18,24 @@ public class NotificationActivity extends AppCompatActivity {
         notify=findViewById(R.id.textView);
         notify.setText(roomid+" ," +
                 ""+intent.getStringExtra("message"));*/
-
-        onNewIntent(getIntent());
+        TextView textView = findViewById(R.id.textView);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                Object value = bundle.get(key);
+                textView.append(key + ": " + value + "\n\n");
+            }
+        }
+        //onNewIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        Bundle extras = intent.getExtras();
+       /* Bundle extras = intent.getExtras();
         if (extras != null) {
             Toast.makeText(this, extras.getString("Value"), Toast.LENGTH_SHORT).show();
-        }
+        }*/
     }
 }

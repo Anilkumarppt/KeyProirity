@@ -39,7 +39,6 @@ public class RegisterActivity extends AppCompatActivity {
     String username, email, password, mobile, age;
     FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDatabase;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,10 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
         mUserAge = (EditText) findViewById(R.id.signup_age);
         mTermsandCondition = (CheckBox) findViewById(R.id.terms);
         mDatabase = FirebaseDatabase.getInstance().getReference(StaticConfig.FIREBASE_USERROOT);
-
     }
-
-
     public void create_account(View view) {
         username = mUsername.getText().toString();
         email = mUseremail.getText().toString();
@@ -152,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void login(View view) {
-        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }

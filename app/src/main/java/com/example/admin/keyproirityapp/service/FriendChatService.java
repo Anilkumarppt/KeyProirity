@@ -1,22 +1,16 @@
 package com.example.admin.keyproirityapp.service;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.util.Base64;
 import android.util.Log;
 
-import com.example.admin.keyproirityapp.MainActivity;
 import com.example.admin.keyproirityapp.R;
 import com.example.admin.keyproirityapp.database.FriendDB;
 import com.example.admin.keyproirityapp.database.GroupDB;
@@ -49,6 +43,7 @@ public class FriendChatService extends Service {
     public CountDownTimer updateOnline;
 
     public FriendChatService() {
+
     }
 
 
@@ -92,7 +87,7 @@ public class FriendChatService extends Service {
                                         mapBitmap.put(friend.idRoom, BitmapFactory.decodeResource(getResources(), R.drawable.default_avata));
                                     }
                                 }
-                                createNotify(friend.name, (String) ((HashMap) dataSnapshot.getValue()).get("text"), friend.idRoom.hashCode(), mapBitmap.get(friend.idRoom), false);
+                                //createNotify(friend.name, (String) ((HashMap) dataSnapshot.getValue()).get("text"), friend.idRoom.hashCode(), mapBitmap.get(friend.idRoom), false);
 
                             } else {
                                 mapMark.put(friend.idRoom, true);
@@ -134,7 +129,7 @@ public class FriendChatService extends Service {
                                 if (mapBitmap.get(group.id) == null) {
                                     mapBitmap.put(group.id, BitmapFactory.decodeResource(getResources(), R.drawable.ic_notify_group));
                                 }
-                                createNotify(group.groupInfo.get("name"), (String) ((HashMap) dataSnapshot.getValue()).get("text"), group.id.hashCode(), mapBitmap.get(group.id), true);
+                                //createNotify(group.groupInfo.get("name"), (String) ((HashMap) dataSnapshot.getValue()).get("text"), group.id.hashCode(), mapBitmap.get(group.id), true);
                             } else {
                                 mapMark.put(group.id, true);
                             }
@@ -174,7 +169,7 @@ public class FriendChatService extends Service {
         mapMark.put(id, false);
     }
 
-    public void createNotify(String name, String content, int id, Bitmap icon, boolean isGroup) {
+    /*public void createNotify(String name, String content, int id, Bitmap icon, boolean isGroup) {
         Intent activityIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, activityIntent, PendingIntent.FLAG_ONE_SHOT);
         NotificationCompat.Builder notificationBuilder = new
@@ -197,7 +192,7 @@ public class FriendChatService extends Service {
         notificationManager.cancel(id);
         notificationManager.notify(id,
                 notificationBuilder.build());
-    }
+    }*/
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

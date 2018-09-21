@@ -100,14 +100,16 @@ public class LoginActivity extends Activity {
                 } else {
                     String onlineUser_id = mAuth.getCurrentUser().getUid();
                     String device_token = FirebaseInstanceId.getInstance().getToken();
-                    userReference.child(onlineUser_id).child("deviceToken").setValue(device_token).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    HashMap<String, Object> tokenHashMap = new HashMap<>();
+                    tokenHashMap.put("deviceToken", device_token);
+                    userReference.child(onlineUser_id).updateChildren(tokenHashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(LoginActivity.this, "SignIn Sucess", Toast.LENGTH_SHORT).show();
                             currentUser = mAuth.getCurrentUser();
                             saveUserInfo();
                             Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            // mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(mainIntent);
                         }
                     });
@@ -127,7 +129,11 @@ public class LoginActivity extends Activity {
                 userInfo.name = (String) hashUser.get("name");
                 userInfo.email = (String) hashUser.get("email");
                 userInfo.avata = (String) hashUser.get("avata");
+                userInfo.mobile = (String) hashUser.get("mobile");
+                userInfo.deviceToken = (String) hashUser.get("deviceToken");
+
                 SharedPreferenceHelper.getInstance(LoginActivity.this).saveUserInfo(userInfo);
+
             }
 
             @Override

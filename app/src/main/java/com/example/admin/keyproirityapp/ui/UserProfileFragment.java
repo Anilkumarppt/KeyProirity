@@ -49,6 +49,7 @@ import com.yarolegovich.lovelydialog.LovelyProgressDialog;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -72,10 +73,15 @@ public class UserProfileFragment extends Fragment {
     private ValueEventListener userListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-
             listConfig.clear();
-            myAccount = dataSnapshot.getValue(User.class);
-            // Toast.makeText(context, myAccount.name.toString(), Toast.LENGTH_SHORT).show();
+            HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+            String name = (String) map.get("name");
+            String avata = (String) map.get("avata");
+            String email = (String) map.get("email");
+            String mobile = (String) map.get("mobile");
+            String deviceToken = (String) map.get("deviceToken");
+            myAccount = new User(name, email, avata, mobile, deviceToken);
+
             setupArrayListInfo(myAccount);
             if (infoAdapter != null) {
                 infoAdapter.notifyDataSetChanged();
@@ -135,7 +141,10 @@ public class UserProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
-        String uid = user.getUid().toString();
+        String uid = null;
+        if (user != null) {
+            uid = user.getUid().toString();
+        }
         userDB = FirebaseDatabase.getInstance().getReference().child("user").child(uid);
         userDB.addValueEventListener(userListener);
 
@@ -296,12 +305,6 @@ public class UserProfileFragment extends Fragment {
                     if (config.getLabel().equals(SIGNOUT_LABEL)) {
                         signOutUser();
 
-                        FirebaseAuth.getInstance().signOut();
-                        FriendDB.getInstance(getContext()).dropDB();
-                        GroupDB.getInstance(getContext()).dropDB();
-
-                        ServiceUtils.stopServiceFriendChat(getContext().getApplicationContext(), true);
-                        getActivity().finish();
                     }
 
                     if (config.getLabel().equals(USERNAME_LABEL)) {
@@ -352,13 +355,18 @@ public class UserProfileFragment extends Fragment {
 
                 private void signOutUser() {
                     userDB.child("status").child("isOnline").setValue("false");
+                    FriendDB.getInstance(getContext()).dropDB();
+                    GroupDB.getInstance(getContext()).dropDB();
+                    ServiceUtils.stopServiceFriendChat(getContext().getApplicationContext(), true);
+                    FirebaseAuth.getInstance().signOut();
+                    Intent signIn = new Intent(getActivity(), LoginActivity.class);
+                    signIn.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    getActivity().finish();
+                    getActivity().startActivity(signIn);
                 }
             });
         }
 
-        /**
-         * Cập nhật username mới vào SharedPreference và thay đổi trên giao diện
-         */
         private void changeUserName(String newName) {
             userDB.child("name").setValue(newName);
 

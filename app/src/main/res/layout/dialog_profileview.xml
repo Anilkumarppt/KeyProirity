@@ -29,62 +29,48 @@
             android:tag="@string/ProfileName"
             android:textAlignment="textStart" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/userImage"
             android:layout_centerHorizontal="true"
             android:background="@color/white"
-            android:padding="5dp">
+            android:padding="15dp"
+            android:weightSum="4">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/message_dialog"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/ic_message_black_24dp"
-                android:text="TextView"
+                android:layout_weight="1"
+                android:src="@drawable/ic_message_black_24dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/call_dialog"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="90dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/ic_call_black_24dp"
-                android:text="TextView"
+                android:layout_weight="1"
+                android:src="@drawable/ic_call_black_24dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/videocall_dialog"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="40dp"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="10dp"
-                android:layout_toRightOf="@+id/call_dialog"
-                android:background="@drawable/ic_videocam_black_24dp"
-                android:text="TextView"
+                android:layout_weight="1"
+                android:src="@drawable/ic_videocam_black_24dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/info_dialog"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="10dp"
-                android:layout_toRightOf="@+id/videocall_dialog"
-                android:background="@drawable/ic_videocam_black_24dp"
-                android:text="TextView"
+                android:layout_weight="1"
+                android:src="@drawable/ic_videocam_black_24dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </RelativeLayout>
 

@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="mytheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="mytheme" parent="AppTheme">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#03A9F4</item>
         <item name="colorPrimaryDark">#0288D1</item>
@@ -11,6 +11,13 @@
         <item name="windowNoTitle">true</item>
         <!-- set Can use Activity transitions -->
         <item name="android:windowContentTransitions" tools:targetApi="lollipop">true</item>
+    </style>
+
+    <style name="mytheme_NoActionBar" parent="mytheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorAccent">#4fa881</item>
+        <item name="colorPrimaryDark">#4fa881</item>
     </style>
 
     <style name="chat_timings">
@@ -28,6 +35,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
+
     <style name="AppFullScreentheme" parent="Theme.AppCompat.Light">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -35,6 +43,7 @@
         <item name="android:windowContentOverlay">@color/textColorPrimary</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
+
     <style name="AppFullScreentheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppFullScreentheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
@@ -43,6 +52,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
     <style name="ChatTheme" parent="AppTheme.NoActionBar">
         <item name="colorPrimary">#03A9F4</item>
         <item name="colorPrimaryDark">#FFCC00</item>
@@ -50,6 +60,7 @@
         <item name="android:windowBackground">@color/black_overlay</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
+
     <style name="MyThemeNoActionbar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -87,5 +98,5 @@
         <item name="colorPrimary">#03A9F4</item>
         <item name="colorPrimaryDark">#FFCC00</item>
         <item name="colorAccent">#4fa881</item>
-       </style>
+    </style>
 </resources>
